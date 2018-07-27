@@ -5,14 +5,14 @@ include_once "Empleado.php";
 class Pedido
 {
     #ATRIBUTOS -----------------------------------------------------------------------------------
-    public idPedido;
-    public idMesa;
-    public fotoMesa;
-    public horaPedido;
+    public $idPedido;
+    public $idMesa;
+    public $fotoMesa;
+    public $horaPedido;
 
     #FUNCIONES DB --------------------------------------------------------------------------------
     //VER LO DEL ID ALFANUM
-    public GuardarPedido()
+    public function GuardarPedido()
     {
         $objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso(); 
         $consulta =$objetoAccesoDato->RetornarConsulta("
@@ -27,7 +27,7 @@ class Pedido
         return $objetoAccesoDato->RetornarUltimoIdInsertado();	
     }
 
-    public TraerTodosPedidos()
+    public function TraerTodosPedidos()
     {
         $objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso(); 
         $consulta =$objetoAccesoDato->RetornarConsulta("
