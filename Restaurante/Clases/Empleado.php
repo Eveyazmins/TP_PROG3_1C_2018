@@ -3,12 +3,12 @@
 class Empleado
 {
         #ATRIBUTOS-----------------------------------------------------------------------------------
-        public $_id;
-        public $_usuario;
-        public $_clave;
-        public $_perfil;
-        public $_sector;
-        public $_estado;
+        public $id;
+        public $usuario;
+        public $clave;
+        public $sector;
+        public $perfil;
+        public $estado;
     
 
         #FUNCIONES DB ---------------------------------------------------------------------------------
@@ -21,11 +21,11 @@ class Empleado
            INSERT INTO Empleados (usuario, clave, sector, perfil, estado) 
            VALUES(:usuario, :clave, :sector, :perfil, :estado)");
    
-           $consulta->bindValue(':usuario',$this->_usuario, PDO::PARAM_STR);
-           $consulta->bindValue(':clave', $this->_password, PDO::PARAM_STR);
-           $consulta->bindValue(':sector', $this->_sector, PDO::PARAM_STR);
-           $consulta->bindValue(':perfil', $this->_perfil, PDO::PARAM_STR);
-           $consulta->bindValue(':estado', $this->_estado, PDO::PARAM_STR);
+           $consulta->bindValue(':usuario',$this->usuario, PDO::PARAM_STR);
+           $consulta->bindValue(':clave', $this->password, PDO::PARAM_STR);
+           $consulta->bindValue(':sector', $this->tipo, PDO::PARAM_STR);
+           $consulta->bindValue(':perfil', $this->perfil, PDO::PARAM_STR);
+           $consulta->bindValue(':estado', $this->estado, PDO::PARAM_STR);
            $consulta->execute();
    
             return $objetoAccesoDato->RetornarUltimoIdInsertado();			
@@ -148,7 +148,7 @@ class Empleado
    
         }
 
-        public static function CantidadOperacionesEmpleado($id)
+        public static function CantOperacionesEmpleado($id)
         {
             $objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso(); 
             $consulta =$objetoAccesoDato->RetornarConsulta("
@@ -159,5 +159,67 @@ class Empleado
             return $consulta->rowCount();
         }
 
+        public static function SesionesEmpleados()
+        {
+            $objetoAccesoDato= AccesoDatos::DameUnObjetoAcceso();
+            $consulta=$objetoAccesoDato->RetornarConsulta("
+            SELECT e.usuario, s.horaInicio 
+            from empleados as e, sesiones as s 
+            where s.idEmpleado=e.id 
+            ORDER by e.usuario");
+            $consulta->execute();
+            $sesiones= $consulta->fetchAll(PDO::FETCH_CLASS);
+            return $sesiones;
+        }
+
+        
+        public static function CantidadOperacionesunSector($sector)
+        {
+            var_dump($sector);
+            $objetoAccesoDato= AccesoDatos::DameUnObjetoAcceso();
+            $consulta=$objetoAccesoDato->RetornarConsulta("SELECT e.usuario, COUNT(*) as operaciones FROM empleados as e, pedidodetalle as pd WHERE pd.idEmpleado= e.id and pd.sector=:sector GROUP by e.usuario");
+            $consulta->bindValue(':sector', $sector, PDO::PARAM_STR);
+            
+            $consulta->execute();
+            $operaciones= $consulta->fetchAll(PDO::FETCH_CLASS);
+            return $operaciones;
+            
+        }
+
+        public static function CantidadOperacionesTodosSectores()
+        {
+            $objetoAccesoDato= AccesoDatos::DameUnObjetoAcceso();
+            $consulta=$objetoAccesoDato->RetornarConsulta("
+            SELECT sector as sector, COUNT(*) as operaciones 
+            FROM pedidodetalle 
+            GROUP by sector");
+            $consulta->execute();
+            $operaciones= $consulta->fetchAll(PDO::FETCH_CLASS);
+            return $operaciones;
+        }
+    
+        public static function CantidadOperacionesUnEmpleado($idEmpleado)
+        {
+            $objetoAccesoDato= AccesoDatos::DameUnObjetoAcceso();
+            $consulta=$objetoAccesoDato->RetornarConsulta("SELECT e.usuario, COUNT(*) as operaciones from empleados as e, pedidodetalle as pd where pd.idEmpleado in (SELECT e.id from empleados WHERE e.id= :idEmpleado)");
+            $consulta->bindValue(':idEmpleado', $idEmpleado, PDO::PARAM_INT);
+            
+            $consulta->execute();
+            $operaciones= $consulta->fetchAll(PDO::FETCH_CLASS);
+            return $operaciones;
+            
+        }
+        public static function CantidadOperacionesTodosEmpleados()
+        {
+            $objetoAccesoDato= AccesoDatos::DameUnObjetoAcceso();
+            $consulta=$objetoAccesoDato->RetornarConsulta("
+            SELECT e.usuario as empleado, COUNT(*) as operaciones 
+            FROM empleados as e, pedidodetalle as pd 
+            WHERE pd.idEmpleado= e.id 
+            GROUP by e.usuario");
+            $consulta->execute();
+            $operaciones= $consulta->fetchAll(PDO::FETCH_CLASS);
+            return $operaciones;   
+        }
 
 }

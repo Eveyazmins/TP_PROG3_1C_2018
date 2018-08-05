@@ -108,11 +108,14 @@ class EmpleadoApi extends Empleado implements IApiUsable
 
    public static function CambiarEstado($request, $response, $args) 
    {
+       //PROBAR PARA ACTIVO - ACTIVO
+       //PROBAR PARA SUSPENDIDO - SUSPENDIDO
+       //PROBAR PARA SUSPENDIDO - ACTIVO
+
        $ArrayDeParametros = $request->getParsedBody(); 
        $id=$ArrayDeParametros['id'];
        $estado=$ArrayDeParametros['estado'];   	
        $resultado= Empleado::CambiarEstadoEmpleado($id,$estado);
-       
        $objRespuesta= new stdclass();
        //var_dump($resultado);
        $objRespuesta->resultado=$resultado;
@@ -140,6 +143,46 @@ class EmpleadoApi extends Empleado implements IApiUsable
         
         return $response->withJson($respuesta, 200);		
   }
+
+  public static function SesionesEmpleados($request, $response, $args)
+  {
+      $objDelaRespuesta= new stdclass();
+      $objDelaRespuesta=Empleado::SesionesEmpleados();
+      return $response->withJson($objDelaRespuesta, 200);
+  }
+
+  public static function OperacionesTodosEmpleados($request, $response, $args)
+  {
+      $objDelaRespuesta= new stdclass();
+      $objDelaRespuesta=Empleado::CantidadOperacionesTodosEmpleados();
+      return $response->withJson($objDelaRespuesta, 200);
+  }
+
+  public static function OperacionesTodosSectores($request, $response, $args)
+  {
+      $ArrayDeParametros = $request->getParsedBody();
+      $objDelaRespuesta= new stdclass();
+      $objDelaRespuesta=Empleado::CantidadOperacionesTodosSectores();
+      return $response->withJson($objDelaRespuesta, 200);
+  }
+
+  public static function OperacionesUnEmpleado($request, $response, $args)
+  {
+      $id=$args['id'];
+      $operaciones=Empleado::CantidadOperacionesUnEmpleado($id);
+      return $response->withJson($operaciones, 200);
+  }
+
+  public static function OperacionesUnSector($request, $response, $args)
+  {
+      $sector=$args['sector'];
+      $objDelaRespuesta= new stdclass();
+      $objDelaRespuesta=Empleado::CantidadOperacionesUnSector($sector);
+      return $response->withJson($objDelaRespuesta, 200);
+
+  }
+
+  
 
 
 
