@@ -91,4 +91,53 @@ class PedidoApi {
             return $response->withJson($objDelaRespuesta, 200);
         }
 
+
+        public static function TraerPendientesEmpleado($request, $response, $args)
+        {
+            $objDelaRespuesta=new stdclass();
+            $ArrayDeParametros = $request->getParsedBody();
+            $token=$ArrayDeParametros['token'];
+            $payload=AutentificadorJWT::ObtenerData($token);
+            $idEmpleado=$payload->idEmpleado;
+            $objDelaRespuesta=Detalle::TraerPendientes($idEmpleado);
+            
+            return $response->withJson($objDelaRespuesta, 200);
+        }
+
+        //ACA QUEDE
+        public static function PrepararPedido($request, $response, $args)
+        {
+            $respuesta=new stdclass();
+            $ArrayDeParametros = $request->getParsedBody();
+            $token=$ArrayDeParametros['token'];
+            $payload=AutentificadorJWT::ObtenerData($token);
+            $idEmpleado=$payload->idEmpleado;
+            $idDetalle=$ArrayDeParametros['idDetalle'];
+            $tiempoPreparacion=$ArrayDeParametros['tiempoPreparacion'];
+            $tiempoPreparacion=$tiempoPreparacion;
+            $ahora=date('Y/m/d G:i'); 
+            $tiempo=strtotime($ahora. ' + '. $tiempoPreparacion . 'minutes');
+            $miDetalle=new Detalle();
+            $miDetalle->idDetalle=$idDetalle;
+            $miDetalle->tiempoPreparacion=date('Y/m/d G:i',$tiempo);
+            $miDetalle->idEmpleado=$idEmpleado;
+            $miDetalle->estado="en preparacion";
+            $respuesta=$miDetalle->PrepararDetalle();
+        
+           
+            return $response->withJson($respuesta,200);
+        
+        }
+
+
+
+
+
+
+
+
+
+
     }
+
+
