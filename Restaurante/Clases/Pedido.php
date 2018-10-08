@@ -2,56 +2,37 @@
 
 include_once "Empleado.php";
 
-class Pedido
-{
-    #ATRIBUTOS -----------------------------------------------------------------------------------
-    public $idPedido;
-    public $idMesa;
-    public $fotoMesa;
-    public $horaPedido;
-    public $codigoAlfanum;
-    public $nombreCliente;
+class Pedido{
 
-    #FUNCIONES DB --------------------------------------------------------------------------------
-    //VER SI FUNCIONA
-    
-    public function ObtenerCodigoAlfanum()
-    {
-        $objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso();
-        $consulta =$objetoAccesoDato->RetornarConsulta("
-        SELECT * FROM CodigosAlfanum
-        WHERE estado = D LIMIT 1");  
-        $consulta->execute();
-        $codigo = $consulta->fetchAll(PDO::FETCH_CLASS, "Codigo");
-        return $codigo;
-    }
-    
+public $id;
+public $idMesa;
+public $idMozo;
+public $estado;
+public $fotoMesa;
+
     public function GuardarPedido()
     {
-        $this->codigocodigoAlfanum = ObtenerCodigoAlfanum();
         $objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso(); 
-        $consulta =$objetoAccesoDato->RetornarConsulta("
-        INSERT INTO Pedidos (idMesa, fotoMesa, horaPedido, codigoAlfanum, nombreCliente
-        VALUES(:idMesa, :fotoMesa, :horaPedido, :codigoAlfanum, nombreCliente");
-
-        $consulta->bindValue(':idMesa',$this->idMesa, PDO::PARAM_STR);
+	    $consulta =$objetoAccesoDato->RetornarConsulta("INSERT into Pedidos (idMesa, idMozo, estado, fotoMesa)
+        values(:idMesa, :idMozo, estado, :fotoMesa)");
+        $consulta->bindValue(':idMesa', $this->idMesa, PDO::PARAM_STR);
+        $consulta->bindValue(':idMozo', $this->idMozo, PDO::PARAM_INT);
+        $consulta->bindValue(':estado', $this->estado);
         $consulta->bindValue(':fotoMesa', $this->fotoMesa, PDO::PARAM_STR);
-        $consulta->bindValue(':horaPedido', $this->horaPedido, PDO::PARAM_STR);
-        $consulta->bindValue(':codigoAlfanum', $this->codigoAlfanum, PDO::PARAM_STR);
-        $consulta->bindValue(':nombreCliente', $this->nombreCliente, PDO::PARAM_STR);
         $consulta->execute();
-
-        return $objetoAccesoDato->RetornarUltimoIdInsertado();	
+	    return $objetoAccesoDato->RetornarUltimoIdInsertado();
     }
 
-    public function TraerTodosPedidos()
+    public static function TraerTodosLosPedidos() 
     {
-        $objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso(); 
-        $consulta =$objetoAccesoDato->RetornarConsulta("
-        SELECT * FROM Pedidos");
-        $consulta->execute();
-        $pedidos= $consulta->fetchAll(PDO::FETCH_CLASS, "Pedido");
-        return $pedidos;
-    } 
+	    $objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso(); 
+	    $consulta =$objetoAccesoDato->RetornarConsulta("SELECT * from pedidos ");  
+	    $consulta->execute();
+	    $pedidos= $consulta->fetchAll(PDO::FETCH_CLASS, "Pedido");        
+        return $pedidos;							
+    }
+
+    
 
 }
+

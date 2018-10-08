@@ -3,41 +3,15 @@ require_once 'Empleado.php';
 require_once 'IApiUsable.php';
 require_once 'AutentificadorJWT.php';
 
-
 class EmpleadoApi extends Empleado implements IApiUsable
 {
-    #FUNCIONES API-----------------------------------------------------------------------------------
-
-    public function TraerUno($request, $response, $args) 
-    {    
-        $id=$args['id'];
-        $empleado=Empleado::TraerUnEmpleado($id);
-        if(!$empleado)
-        {
-           $objRespuesta= new stdclass();
-           $objRespuesta->error="No existe El usuario";
-           $Respuesta = $response->withJson($objRespuesta, 500); 
-        }
-        else
-        {
-            $Respuesta = $response->withJson($empleado, 200); 
-        }     
-        return $Respuesta;
-    }
-
-
-    public function TraerTodos($request, $response, $args) 
-    {
-       $todosEmpleados = Empleado::TraerTodosEmpleados();
-       $Respuesta = $response->withJson($todosEmpleados,200);  
-       return $Respuesta;
-    }
+    //CARGAR NUEVO EMPLEADO
 
     public function CargarUno($request, $response, $args)
     {
-        $objRespuesta= new stdclass();
+        $objDelaRespuesta= new stdclass();
         $ArrayDeParametros = $request->getParsedBody();
-       //var_dump($ArrayDeParametros);
+
         $usuario= $ArrayDeParametros['usuario'];
         $sector= $ArrayDeParametros['sector'];
         $clave= $ArrayDeParametros['clave'];
@@ -50,41 +24,20 @@ class EmpleadoApi extends Empleado implements IApiUsable
         $miEmpleado->sector=$sector;
         $miEmpleado->perfil=$perfil;
         $miEmpleado->estado=$estado;
+
         $ultimoId=$miEmpleado->InsertarEmpleado();    
-
-        $objRespuesta->respuesta="Se guardo el Empleado.";
-        $objRespuesta->ultimoIdGrabado=$ultimoId;   
-        return $response->withJson($objRespuesta, 200);
+        $objDelaRespuesta->respuesta="Se guardo el Empleado";
+        $objDelaRespuesta->ultimoIdGrabado=$ultimoId;   
+        return $response->withJson($objDelaRespuesta, 200);
     }
-
-    public function BorrarUno($request, $response, $args) {
-    $ArrayDeParametros = $request->getParsedBody();
     
-    $id=$ArrayDeParametros['id'];
-    $empleado= new Empleado();
-    $empleado->id=$id;
-    
-    $cantidadBorrados=$empleado->BorrarEmpleado();
-
-    $objDeRespuesta= new stdclass();
-    $objRespuesta->cantidad=$cantidadBorrados;
-    if($cantidadDeBorrados>0)
-    {
-        $objRespuesta->resultado="algo borro!!!";
-    }
-    else
-    {
-        $objRespuesta->resultado="no Borro nada!!!";
-    }
-    $Respuesta = $response->withJson($ArrayDeParametros, 200);  
-     return $Respuesta;
-    }
+    //MODIFICAR DATOS EMPLEADO
 
     public function ModificarUno($request, $response, $args) 
     {
         $ArrayDeParametros = $request->getParsedBody(); 
-        $objRespuesta= new stdclass();
-
+        $objDelaRespuesta= new stdclass();
+        
         $usuario= $ArrayDeParametros['usuario'];
         $sector= $ArrayDeParametros['sector'];
         $clave= $ArrayDeParametros['clave'];
@@ -99,95 +52,121 @@ class EmpleadoApi extends Empleado implements IApiUsable
         $miEmpleado->id=$id;
 
         $resultado =$miEmpleado->ModificarEmpleado();
-        $objRespuesta= new stdclass();
-        //var_dump($resultado);
-        $objRespuesta->resultado=$resultado;
-        $objRespuesta->tarea="modificar";
-        return $response->withJson($objRespuesta, 200);		
+        $objDelaRespuesta= new stdclass();
+        $objDelaRespuesta->resultado=$resultado;
+        $objDelaRespuesta->tarea="modificar";
+
+        return $response->withJson($objDelaRespuesta, 200);		
    }
 
-   public static function CambiarEstado($request, $response, $args) 
-   {
-       //PROBAR PARA ACTIVO - ACTIVO
-       //PROBAR PARA SUSPENDIDO - SUSPENDIDO
-       //PROBAR PARA SUSPENDIDO - ACTIVO
+   //BORRAR EMPLEADO
+   
+    public function BorrarUno($request, $response, $args) 
+    {
+        $ArrayDeParametros = $request->getParsedBody();
+        $id=$ArrayDeParametros['id'];
+        $empleado= new Empleado();
+        $empleado->id=$id;
+    
+        $cantidadDeBorrados=$empleado->BorrarEmpleado();
 
-       $ArrayDeParametros = $request->getParsedBody(); 
-       $id=$ArrayDeParametros['id'];
-       $estado=$ArrayDeParametros['estado'];   	
-       $resultado= Empleado::CambiarEstadoEmpleado($id,$estado);
-       $objRespuesta= new stdclass();
-       //var_dump($resultado);
-       $objRespuesta->resultado=$resultado;
-       $objRespuesta->tarea="Suspender";
-       
-       return $response->withJson($objRespuesta, 200);		
-   }
+        $objDelaRespuesta= new stdclass();
+        $objDelaRespuesta->cantidad=$cantidadDeBorrados;
+        
+        if($cantidadDeBorrados>0)
+        {
+            $objDelaRespuesta->resultado="algo borro!!!";
+        }
+        else
+        {
+            $objDelaRespuesta->resultado="no Borro nada!!!";
+        }
+        $newResponse = $response->withJson($ArrayDeParametros, 200);  
+        return $newResponse;
+    }
 
-   public function Login($request, $response, $args) 
-   {
-       $ArrayDeParametros = $request->getParsedBody();
-       
-       $usuario=$ArrayDeParametros['usuario'];
-       $clave=$ArrayDeParametros['clave'];
-       $empleado=Empleado::ValidarEmpleado($usuario,$clave);
+    // SUSPENDER EMPLEADO (VER SI FUNCIONA ASI O USAR ESTATICAS)
 
-       $datos = array(
-           'usuario' => $empleado->usuario,
-           'perfil' => $empleado->perfil, 
-           'id'=>$empleado->id
-        );
+    public function SuspenderUno($request, $response, $args) 
+    {
+        $ArrayDeParametros = $request->getParsedBody();
+        $id=$ArrayDeParametros['id'];
+        $empleado= new Empleado();
+        $empleado->id=$id;
+    
+        $cantidadDeSuspendidos=$empleado->SuspenderEmpleado();
+    }
+
+    //RE-ACTIVAR EMPLEADO (VER SI FUNCIONA ASI O USAR ESTATICAS)
+
+    public function ReanudarUno($request, $response, $args) 
+    {
+        $ArrayDeParametros = $request->getParsedBody();
+        $id=$ArrayDeParametros['id'];
+        $empleado= new Empleado();
+        $empleado->id=$id;
+    
+        $cantidadDeSuspendidos=$empleado->ReanudarEmpleado();
+    }
+
+    //LOGIN (VER SI FUNCIONA CON 'VALIDARLOGIN' ESTATICA)
+
+    public function Login($request, $response, $args) 
+    {
+        $ArrayDeParametros = $request->getParsedBody();
+        $usuario=$ArrayDeParametros['usuario'];
+	    $clave=$ArrayDeParametros['clave'];
+        
+        $empleado=Empleado::ValidarLogIn($usuario,$clave);
+        $datos = array('usuario' => $empleado->usuario,'perfil' => $empleado->perfil, 
+        'id'=>$empleado->id, 'sector'=>$empleado->sector , 'estado'=>$empleado->estado);
         
         $token= AutentificadorJWT::CrearToken($datos);
         $respuesta= array('token'=>$token,'datos'=> $datos);
         
-        return $response->withJson($respuesta, 200);		
-  }
+		return $response->withJson($respuesta, 200);		
+    }
 
-  public static function SesionesEmpleados($request, $response, $args)
-  {
-      $objDelaRespuesta= new stdclass();
-      $objDelaRespuesta=Empleado::SesionesEmpleados();
-      return $response->withJson($objDelaRespuesta, 200);
-  }
+    //OPERACIONES DE UN EMPLEADO
 
-  public static function OperacionesTodosEmpleados($request, $response, $args)
-  {
-      $objDelaRespuesta= new stdclass();
-      $objDelaRespuesta=Empleado::CantidadOperacionesTodosEmpleados();
-      return $response->withJson($objDelaRespuesta, 200);
-  }
+    public static function OperacionesUnEmpleado($request, $response, $args)
+    {
+        $id=$args['id'];
+        $operaciones=Empleado::CantidadOperacionesEmpleado($id);
+        return $response->withJson($operaciones, 200);
+    }
 
-  public static function OperacionesTodosSectores($request, $response, $args)
-  {
-      $ArrayDeParametros = $request->getParsedBody();
-      $objDelaRespuesta= new stdclass();
-      $objDelaRespuesta=Empleado::CantidadOperacionesTodosSectores();
-      return $response->withJson($objDelaRespuesta, 200);
-  }
+    //OPERACIONES DE UN SECTOR
 
-  public static function OperacionesUnEmpleado($request, $response, $args)
-  {
-      $id=$args['id'];
-      $operaciones=Empleado::CantidadOperacionesUnEmpleado($id);
-      return $response->withJson($operaciones, 200);
-  }
+    public static function OperacionesUnSector($request, $response, $args)
+    {
+        $sector=$args['sector'];
+        $objDelaRespuesta= new stdclass();
+        $objDelaRespuesta=Empleado::CantidadOperacionesSector($sector);
+        return $response->withJson($objDelaRespuesta, 200);
+    }
 
-  public static function OperacionesUnSector($request, $response, $args)
-  {
-      $sector=$args['sector'];
-      $objDelaRespuesta= new stdclass();
-      $objDelaRespuesta=Empleado::CantidadOperacionesUnSector($sector);
-      return $response->withJson($objDelaRespuesta, 200);
+    //OPERACIONES EMPLEADO Y SECTOR (VER SI ES ASI)
 
-  }
+    public static function OperacionesUnEmpleadoYSector($request, $response, $args)
+    {
+        $sector=$args['sector'];
+        $sector=$args['id'];
+        $objDelaRespuesta= new stdclass();
+        $objDelaRespuesta=Empleado::CantidadOperacionesEmpleadoSector($sector);
+        return $response->withJson($objDelaRespuesta, 200);
+    }
+    
+    //INGRESOS AL SISTEMA
 
-  
-
-
-
-
-
+    public static function FechasDeLogueo()
+	{
+		$objetoAccesoDato= AccesoDatos::DameUnObjetoAcceso();
+		$consulta=$objetoAccesoDato->RetornarConsulta("SELECT e.usuario, s.horaInicio from empleados as e, sesiones as s where s.idEmpleado=e.id ORDER by e.usuario");
+		$consulta->execute();
+		$fechas= $consulta->fetchAll(PDO::FETCH_CLASS);
+		return $fechas;
+	}
 
 
 }
