@@ -4,72 +4,78 @@ include_once "historico.php";
 
 class empleadoApi extends empleado
 {
-    //CargoUno
+    //Cargar un empleado (desde el index valido que solo Socios puedan agregar empleados)
+
     public function CargarUno($request, $response, $args)
     {
         $ArrayDeParametros = $request->getParsedBody();
         //$objDelaRespuesta= new stdclass();
 
-        if (!isset($ArrayDeParametros['email'])) {
+        //Validaciones de campos vacíos
+        if (!isset($ArrayDeParametros['email'])) 
+        {
             return $response->withJson("email no puede esta vacio",404);   
         }
-        $email= strtolower($ArrayDeParametros['email']);
-        if (empleadoApi::is_valid_email($email) !== true) {
-            return $response->withJson("no es email",404);
-        }
-
-        if (!isset($ArrayDeParametros['clave'])) {
+        
+        if (!isset($ArrayDeParametros['clave'])) 
+        {
             return $response->withJson("clave no puede esta vacio",404);   
         }
-        $clave= password_hash($ArrayDeParametros['clave'],PASSWORD_BCRYPT);
 
-        if (!isset($ArrayDeParametros['nombre'])) {
-            return $response->withJson("nombre no puede esta vacio",404);   
+        if (!isset($ArrayDeParametros['usuario'])) 
+        {
+            return $response->withJson("usuario no puede esta vacio",404);   
         }
-        $nombre= strtolower($ArrayDeParametros['nombre']);
 
-        if ($this->validarNombre($nombre) == false) {
-            return $response->withJson("Error: Nombre solo puede contener letas y numeros",404);
-        }
-        
-        if (!isset($ArrayDeParametros['tipo'])) {
+        if (!isset($ArrayDeParametros['tipo'])) 
+        {
             return $response->withJson("tipo no puede esta vacio",404);   
         }
-        $tipo= strtolower($ArrayDeParametros['tipo']);
 
         if (!isset($ArrayDeParametros['estado'])) {
             return $response->withJson("estado no puede esta vacio",404);   
         }
-        $estado= strtolower($ArrayDeParametros['estado']);
+
+        //valida mail
+        $email= strtolower($ArrayDeParametros['email']);
         
-        //$perfil= $ArrayDeParametros['perfil'];
-        //$alta= date("Y-m-d H:i:s");
+        if (empleadoApi::is_valid_email($email) !== true) 
+        {
+            return $response->withJson("no es email",404);
+        }
+
+        //Encripta la clave para guardar en DB (y en LogIn Api poder validarla con Validate_pass)
+        $clave= password_hash($ArrayDeParametros['clave'],PASSWORD_BCRYPT);
+
+        //valida contenido de nombre
+        $usuario= strtolower($ArrayDeParametros['usuario']);
+
+        if ($this->validarNombre($usuario) == false) 
+        {
+            return $response->withJson("Error: Caracteres no permitidos",404);
+        }
+        
+        $tipo= strtolower($ArrayDeParametros['tipo']);
+
+        $estado= strtolower($ArrayDeParametros['estado']);
 
         $empleadoAux = new empleado();
 
         $empleadoAux->email = $email;
         $empleadoAux->clave = $clave;
-        $empleadoAux->nombre = $nombre;
+        $empleadoAux->usuario = $usuario;
         $empleadoAux->tipo = $tipo;
         $empleadoAux->estado = $estado;
         
-
-        // if (foto::validarNombre($empleadoAux->nombre) == false) {
-        //     throw new Exception('Error: Nombre solo puede contener letas y numeros');
-        // }
-
-
-        //$foto = $_FILES['foto'];
         $e = empleado::TraerEmail($empleadoAux->email);
 
-        
         if ($e == null){
             $empleadoAux->InsertarEmpleadoParametros();
-            $response->getBody()->write("Se dio de alta al empleado: ".$nombre,202);
+            $response->getBody()->write("Se dio de alta al empleado: ".$usuario,202);
             //$response->withJson("Se dio de alta al empleado: ".$nombre);
 
         }else {
-            return $response->withJson("El emplado ya existe ",404);
+            return $response->withJson("El empleado ya existe ",404);
         }
 
         return $response;
@@ -110,11 +116,26 @@ class empleadoApi extends empleado
         //si estoy aqui es que todos los caracteres son validos 
         return true; 
     }
+
+    public function validarNumero($cadena){ 
+        $permitidos = "0123456789"; 
+        for ($i=0; $i<strlen($cadena); $i++){ 
+            if (strpos($permitidos, substr($cadena,$i,1))===false){ 
+            //no es válido; 
+            return false; 
+            } 
+        }  
+        //si estoy aqui es que todos los caracteres son validos 
+        return true; 
+    }
+
+
+
     public static function is_valid_email($str){
       return (false !== filter_var($str, FILTER_VALIDATE_EMAIL));
     }
 
-    //TraigoTodos
+    //Trae todos los empleados
     public function traerTodos($request, $response, $args) 
 	{
         $suspendido = $request->getAttribute('suspendidos');
@@ -135,7 +156,23 @@ class empleadoApi extends empleado
     public function traerUno($request, $response, $args) 
 	{
         $ArrayDeParametros = $request->getParsedBody();
+        if (!isset($ArrayDeParametros['id']))
+        {
+            return $response->withJson("Ingrese ID del empleado!", 400);
+        }
+        
         $id= $ArrayDeParametros['id'];
+
+        if ($this->validarNumero($id) == false) 
+        {
+            return $response->withJson("Ingrese ID válido",404);
+        }
+
+        if($id == null)
+        {
+            return $response->withJson("Ingrese ID del empleado",404);
+        }
+
         $empBuscado = empleado::TraerEmpleadoID($id);
         return $response->withJson($empBuscado, 200);  
     }
@@ -153,7 +190,7 @@ class empleadoApi extends empleado
                 return $response->withJson('Error al borrar: No existe empleado con id: '.$id,404);
             }
 
-            $nombreViejo =$empBorrar->nombre;
+            $nombreViejo =$empBorrar->usuario;
             if(empleado::BorrarEmpleadoID($id)>0){       
                 return $response->withJson('Se borro con exito a '.$nombreViejo,202);
             }else{
@@ -185,7 +222,7 @@ class empleadoApi extends empleado
                 $accion = 'suspendido';
                 empleado::SuspenderEmpleadoParametros($id,$accion);
                     //$empModificar->SuspenderEmpleadoParametros();
-                    $objDelaRespuesta->resultado="Se suspendio a : ".$empModificar->nombre;
+                    $objDelaRespuesta->resultado="Se suspendio a : ".$empModificar->usuario;
             }
             else 
             {
@@ -213,7 +250,7 @@ class empleadoApi extends empleado
                 $accion = "activo";
                 empleado::SuspenderEmpleadoParametros($id,$accion);
                     //$empModificar->SuspenderEmpleadoParametros();
-                    $objDelaRespuesta->resultado="Se activo a : ".$empModificar->nombre;
+                    $objDelaRespuesta->resultado="Se activo a : ".$empModificar->usuario;
             }
             else 
             {
@@ -236,17 +273,17 @@ class empleadoApi extends empleado
 
             if ($empModificar != false) {
                 $objDelaRespuesta->msj = "se modifico empleado con id ".$id;
-                if (isset($ArrayDeParametros['nombre'])) {
-                    $nombre = strtolower($ArrayDeParametros['nombre']);
-                    $empModificar->nombre = $nombre;
-                    if ($empModificar->nombre== "" || !isset($empModificar->nombre)) {
-                        return $response->withJson('Error: nombre no puede esta vacio',404);
+                if (isset($ArrayDeParametros['usuario'])) {
+                    $nombre = strtolower($ArrayDeParametros['usuario']);
+                    $empModificar->usuario = $usuario;
+                    if ($empModificar->usuario== "" || !isset($empModificar->usuario)) {
+                        return $response->withJson('Error: usuario no puede esta vacio',404);
                     }
-                    if ($this->validarNombre($empModificar->nombre) == false) {
-                        return $response->withJson('Error: Nombre solo puede contener letas y numeros',404);
+                    if ($this->validarNombre($empModificar->usuario) == false) {
+                        return $response->withJson('Error: Usuario solo puede contener letras y numeros',404);
                     }
                     $empModificar->ModificarEmpleadoID($id);
-                    $objDelaRespuesta->nombre =$nombre;
+                    $objDelaRespuesta->usuario =$usuario;
                 }
                 if (isset($ArrayDeParametros['email'])) {
                     $email = strtolower($ArrayDeParametros['email']);

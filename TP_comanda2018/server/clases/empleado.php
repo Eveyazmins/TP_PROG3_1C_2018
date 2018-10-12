@@ -6,7 +6,7 @@ class empleado
     public $id;
     public $email;
     public $clave;
-    public $nombre;
+    public $usuario;
     public $tipo;
     public $estado;
     //public $foto;
@@ -17,10 +17,10 @@ class empleado
     public function InsertarEmpleadoParametros()
 	{
 			$objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso();
-            $consulta =$objetoAccesoDato->RetornarConsulta("INSERT into empleado (email,clave,nombre,tipo,estado)values(:email,:clave,:nombre,:tipo,:estado)");
+            $consulta =$objetoAccesoDato->RetornarConsulta("INSERT into empleado (email,clave,usuario,tipo,estado)values(:email,:clave,:usuario,:tipo,:estado)");
             $consulta->bindValue(':email', $this->email, PDO::PARAM_STR);
             $consulta->bindValue(':clave', $this->clave, PDO::PARAM_STR);
-            $consulta->bindValue(':nombre',$this->nombre, PDO::PARAM_STR);
+            $consulta->bindValue(':usuario',$this->usuario, PDO::PARAM_STR);
             $consulta->bindValue(':tipo', $this->tipo, PDO::PARAM_STR);
             $consulta->bindValue(':estado', $this->estado, PDO::PARAM_STR);
             //$consulta->bindValue(':foto', $this->foto, PDO::PARAM_STR);
@@ -54,7 +54,7 @@ class empleado
     public static function TraerEmpleadoEmail($email) 
 	{//email,clave,nombre,tipo,estado
 			$objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso(); 
-			$consulta =$objetoAccesoDato->RetornarConsulta("select id,email,clave,nombre,tipo,estado from empleado where email = '$email'");
+			$consulta =$objetoAccesoDato->RetornarConsulta("select id,email,clave,usuario,tipo,estado from empleado where email = '$email'");
 			$consulta->execute();
             $EmpAux= $consulta->fetchObject('empleado');
             if($consulta->rowCount() == 0){
@@ -65,7 +65,7 @@ class empleado
 
     public static function TraerEmpleadoEmailClave($email,$clave){
 		$objetoAccesoDatos = AccesoDatos::dameUnObjetoAcceso(); 
-        $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT id,nombre,sexo,email,turno,perfil,foto,alta,estado FROM empleado WHERE email=:email AND clave=:clave");
+        $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT id,usuario,sexo,email,turno,perfil,foto,alta,estado FROM empleado WHERE email=:email AND clave=:clave");
         $consulta->bindValue(':email', $email, PDO::PARAM_STR);
         $consulta->bindValue(':clave', $clave, PDO::PARAM_STR);
 		$consulta->setFetchMode(PDO::FETCH_CLASS, "empleado");
@@ -75,7 +75,7 @@ class empleado
 
     public static function TraerEmpleadoEmailClave2($email,$clave){
 		$objetoAccesoDatos = AccesoDatos::dameUnObjetoAcceso(); 
-        $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT id,nombre,sexo,email,turno,perfil,foto,alta,estado FROM empleado WHERE email=:email AND clave=:clave");
+        $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT id,usuario,sexo,email,turno,perfil,foto,alta,estado FROM empleado WHERE email=:email AND clave=:clave");
         $consulta->bindValue(':email', $email, PDO::PARAM_STR);
         $consulta->bindValue(':clave', $clave, PDO::PARAM_STR);
 		$EmpAux= $consulta->fetchObject('empleado');
@@ -126,9 +126,9 @@ class empleado
     {
         $objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso();
 
-        $consulta =$objetoAccesoDato->RetornarConsulta("UPDATE empleado set nombre=:nombre,email=:email,clave=:clave,tipo=:tipo,estado=:estado WHERE id=$auxID");
+        $consulta =$objetoAccesoDato->RetornarConsulta("UPDATE empleado set usuario=:usuario,email=:email,clave=:clave,tipo=:tipo,estado=:estado WHERE id=$auxID");
             //$consulta->bindValue(':id', $this->id, PDO::PARAM_INT);
-            $consulta->bindValue(':nombre', $this->nombre, PDO::PARAM_STR);
+            $consulta->bindValue(':usuario', $this->usuario, PDO::PARAM_STR);
             $consulta->bindValue(':email', $this->email, PDO::PARAM_STR);
             $consulta->bindValue(':clave', $this->clave, PDO::PARAM_STR);
             $consulta->bindValue(':tipo', $this->tipo, PDO::PARAM_STR);

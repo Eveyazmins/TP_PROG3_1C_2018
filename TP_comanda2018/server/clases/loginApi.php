@@ -73,7 +73,7 @@ class loginApi
                     $token= AutentificadorJWT::CrearToken(array(
                     'id'=> $usuarioBuscado->id,
                     'email'=> $usuarioBuscado->email,
-                    'nombre'=> $usuarioBuscado->nombre,
+                    'usuario'=> $usuarioBuscado->usuario,
                     'tipo'=> $usuarioBuscado->tipo,
                     'estado'=> $usuarioBuscado->estado));
 
@@ -83,7 +83,7 @@ class loginApi
                     $f= date("Y-m-d");
                     $h= date("H:i:s");
                     historico::registrarLogin($usuarioBuscado->id,$f,$h);
-                    $objRespuesta->msj ="Bienvenido ".$datos->nombre;
+                    $objRespuesta->msj ="Bienvenido ".$datos->usuario;
                     $objRespuesta->Token = $token;
                     return $response->withJson($objRespuesta ,200);
                 }
