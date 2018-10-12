@@ -1,0 +1,19 @@
+{
+  "name": "santiago",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/bootstrap": "^3.3.38"
+  },
+  "dependencies": {
+    "@types/bootbox": "^4.4.36",
+    "@types/bootstrap-datepicker": "0.0.12",
+    "@types/chartjs": "0.0.31"
+  }
+}
