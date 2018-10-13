@@ -261,6 +261,7 @@ class empleadoApi extends empleado
             
     }
 
+    //HACER QUE SOLO SE PUEDA MODIFICAR USUARIO, CLAVE Y TIPO.
     public function modificarUno($request, $response, $args) 
     {
             $ArrayDeParametros = $request->getParsedBody();
@@ -274,7 +275,7 @@ class empleadoApi extends empleado
             if ($empModificar != false) {
                 $objDelaRespuesta->msj = "se modifico empleado con id ".$id;
                 if (isset($ArrayDeParametros['usuario'])) {
-                    $nombre = strtolower($ArrayDeParametros['usuario']);
+                    $usuario = strtolower($ArrayDeParametros['usuario']);
                     $empModificar->usuario = $usuario;
                     if ($empModificar->usuario== "" || !isset($empModificar->usuario)) {
                         return $response->withJson('Error: usuario no puede esta vacio',404);

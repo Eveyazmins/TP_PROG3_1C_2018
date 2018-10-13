@@ -3,24 +3,18 @@ use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
 require_once 'vendor/autoload.php';
-//require_once 'clases/AccesoDatos.php';
 require_once 'clases/AccesoDatos.php';
 require_once 'clases/empleadoApi.php';
 require_once 'clases/pedidoApi.php';
 require_once 'clases/mesaApi.php';
 //require_once 'clases/encuestaApi.php';
 require_once 'clases/listados.php';
-//require_once 'clases/cocheraApi.php';
-//require_once 'clases/estacionamientoApi.php';
 require_once 'clases/loginApi.php';
 require_once 'clases/MWparaCORS.php';
 require_once 'clases/MWparaAutentificar.php';
 require_once 'clases/excel.php';
 require_once 'clases/pdf.php';
 require_once 'clases/foto.php';
-
-//require_once 'clases/genericoApi.php';
-
 
 
 $config['displayErrorDetails'] = true;
@@ -57,9 +51,12 @@ $app->get('[/]', function (Request $request, Response $response) {
   return $response;
 
 })->add(\MWparaCORS::class . ':HabilitarCORSTodos');
-//(POST email y clave)
+//Para LogIn Email y clave
 $app->post('/Login[/]', \loginApi::class . ':login');//->add(\MWparaCORS::class . ':HabilitarCORSTodos');
+//Para ver datos del empleado validando Token, ingresar Token + valor token en el header
 $app->post('/datosToken[/]', \loginApi::class . ':datosToken')->add(\MWparaAutentificar::class . ':VerificarUser')->add(\MWparaCORS::class . ':HabilitarCORSTodos');
+
+//FALTA PROBAR!
 $app->post('/Encuesta[/]', \pedidoApi::class . ':encuesta')->add(\MWparaCORS::class . ':HabilitarCORSTodos');
 $app->post('/finalizarEncuesta[/]', \pedidoApi::class . ':finalizarEncuesta')->add(\MWparaCORS::class . ':HabilitarCORSTodos');
 $app->post('/todasEncuestas[/]', \pedidoApi::class . ':traerTodasEncuestas')->add(\MWparaCORS::class . ':HabilitarCORSTodos');
@@ -72,7 +69,7 @@ $app->group('/empleado', function () {
      //Trae todo ( si le agrega una letra a args trae solo los suspendidos)
      $this->get('/[{suspendidos}]', \empleadoApi::class . ':traerTodos');
      $this->post('/traerUno[/]', \empleadoApi::class . ':traerUno');
-     $this->post('/traerEmpleados[/]', \empleadoApi::class . ':traerEmpleados');
+     $this->post('/traerEmpleados[/]', \empleadoApi::class . ':traerTodos');
      //(POST id)
      $this->post('/borrar[/]', \empleadoApi::class . ':BorrarUno');
      //para buscar (POST id) a modificar cualquer dato del alta por post
