@@ -9,21 +9,20 @@ class empleado
     public $usuario;
     public $tipo;
     public $estado;
-    //public $foto;
-    //public $alta;
-    //public $estado;
+    public $foto;
+    
 
     
     public function InsertarEmpleadoParametros()
 	{
 			$objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso();
-            $consulta =$objetoAccesoDato->RetornarConsulta("INSERT into empleado (email,clave,usuario,tipo,estado)values(:email,:clave,:usuario,:tipo,:estado)");
+            $consulta =$objetoAccesoDato->RetornarConsulta("INSERT into empleado (email,clave,usuario,tipo,estado,foto)values(:email,:clave,:usuario,:tipo,:estado,foto)");
             $consulta->bindValue(':email', $this->email, PDO::PARAM_STR);
             $consulta->bindValue(':clave', $this->clave, PDO::PARAM_STR);
             $consulta->bindValue(':usuario',$this->usuario, PDO::PARAM_STR);
             $consulta->bindValue(':tipo', $this->tipo, PDO::PARAM_STR);
             $consulta->bindValue(':estado', $this->estado, PDO::PARAM_STR);
-            //$consulta->bindValue(':foto', $this->foto, PDO::PARAM_STR);
+            $consulta->bindValue(':foto', $this->foto, PDO::PARAM_STR);
             //$consulta->bindValue(':alta', $this->alta, PDO::PARAM_STR);
             $consulta->execute();	
             return $objetoAccesoDato->RetornarUltimoIdInsertado();
@@ -137,7 +136,7 @@ class empleado
             return $consulta->rowCount();
     }
 
-    public static function SuspenderEmpleadoParametros($auxID,$auxEST)
+    public static function CambiarEstadoEmpleadoParametros($auxID,$auxEST)
     {
         $objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso();
 
@@ -147,6 +146,7 @@ class empleado
 
     }
 
+
     public static function operacionesUsuarioEntrada($auxID){
 		$objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso();
         $consulta = $objetoAccesoDato->RetornarConsulta("SELECT count(*) as Num FROM estacionados WHERE idEmpleadoIngreso = $auxID");
@@ -155,19 +155,20 @@ class empleado
         return $consulta->fetch();
     }
 
-    public static function operacionesUsuarioEntradaFecha($auxID,$desde,$hasta)
+    
+    public static function operacionesUsuarioFecha($auxID,$desde,$hasta)
     {
         $objetoAccesoDatos = AccesoDatos::dameUnObjetoAcceso();
         if ($hasta == ""&& $desde !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) as Num FROM estacionados WHERE idEmpleadoIngreso = $auxID AND fechaHoraIngreso >=:desde");
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) as Num FROM pedidos WHERE idEmpleado = $auxID AND fecha >=:desde");
             $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
         }
         if ($desde ==""&& $hasta !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) as Num FROM estacionados WHERE idEmpleadoIngreso = $auxID AND fechaHoraIngreso <=:hasta ");
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) as Num FROM pedidos WHERE idEmpleado = $auxID AND fecha <=:hasta ");
             $consulta->bindValue(":hasta", $hasta, PDO::PARAM_STR);
         }
         if ($desde !="" && $hasta !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) as Num FROM estacionados WHERE idEmpleadoIngreso = $auxID AND fechaHoraIngreso BETWEEN :desde AND :hasta ");
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) as Num FROM estacionados WHERE idEmpleado = $auxID AND fecha BETWEEN :desde AND :hasta ");
             $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
             $consulta->bindValue(":hasta", $hasta, PDO::PARAM_STR);
         }
