@@ -72,7 +72,7 @@ class empleadoApi extends empleado
         $empleadoAux->estado = $estado;
 
         $archivos = $request->getUploadedFiles();
-        $destino="./fotos/";
+        $destino="./fotosEmpleado/";
         //var_dump($archivos);
         //var_dump($archivos['foto']);
         if(isset($archivos['foto']))

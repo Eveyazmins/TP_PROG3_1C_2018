@@ -31,7 +31,7 @@ class comanda
             return $objetoAccesoDato->RetornarUltimoIdInsertado();	
     }
 
-    public function CargarPrecioComanda($auxId, $montoFinal)
+    public function CargarPrecioComanda($auxId, $monto)
     {
         $objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso();
 

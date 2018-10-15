@@ -14,19 +14,19 @@ class pedido
     public $idEmpleado;
     public $fecha;
 
-    public function InsertarVehiculoParametros()
+    public function InsertarPedidoParametros()
 	{
 			$objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso();
-            $consulta =$objetoAccesoDato->RetornarConsulta("INSERT into pedidos2 (id_comanda,id_producto,cantidad,tipo,monto,hora_estimada,hora_final,estado,id_empleado,fecha)values(:idComanda,:idProducto,:cantidad,:tipo,:monto,:horaEstimada,:horaFinal,:estado,:idEmpleado)");
+            $consulta =$objetoAccesoDato->RetornarConsulta("INSERT into pedidos2 (id_comanda,id_producto,cantidad,tipo,hora_estimada,hora_final,estado,id_empleado,monto,fecha)values(:idComanda,:idProducto,:cantidad,:tipo,:horaEstimada,:horaFinal,:estado,:idEmpleado,:monto,:fecha)");
             $consulta->bindValue(':idComanda',$this->idComanda, PDO::PARAM_INT);
             $consulta->bindValue(':idProducto', $this->idProducto, PDO::PARAM_INT);
             $consulta->bindValue(':cantidad', $this->cantidad, PDO::PARAM_INT);
             $consulta->bindValue(':tipo', $this->tipo, PDO::PARAM_STR);
-            $consulta->bindValue(':monto', $this->monto, PDO::PARAM_STR);
             $consulta->bindValue(':horaEstimada',$this->horaEstimada, PDO::PARAM_STR);
             $consulta->bindValue(':horaFinal', $this->horaFinal, PDO::PARAM_STR);
             $consulta->bindValue(':estado', $this->estado, PDO::PARAM_STR);
             $consulta->bindValue(':idEmpleado',$this->idEmpleado, PDO::PARAM_INT);
+            $consulta->bindValue(':monto', $this->monto, PDO::PARAM_STR);
             $consulta->bindValue(':fecha',$this->fecha, PDO::PARAM_STR);
 			$consulta->execute();	
 			return $consulta->fetchAll(PDO::FETCH_CLASS, "pedido");	
@@ -115,7 +115,78 @@ class pedido
         return $consulta->fetchAll();
     }
 
-    //ACA ME QUEDE
+    //OPERACIONES POR EMPLEADO Y SECTOR
+
+    public static function TraerCantidadOperacionesSectorEmpleadoFechas($tipo, $desde,$hasta)
+    {
+        $objetoAccesoDatos = AccesoDatos::dameUnObjetoAcceso();
+
+        if ($hasta == "" && $desde !="") {
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 where tipo = :tipo AND estado = 'Listo para servir' AND fecha >=:desde GROUP BY id_empleado");
+            $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
+            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
+        }
+
+        if ($desde ==""&& $hasta !="") {
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 WHERE tipo = :tipo AND estado = 'Listo para servir' AND fecha <=:hasta ");
+            $consulta->bindValue(":hasta", $hasta, PDO::PARAM_STR);
+            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
+        }
+
+        if ($desde !="" && $hasta !="") {
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 WHERE tipo = :tipo AND estado = 'Listo para servir' AND fecha BETWEEN :desde AND :hasta ");
+            $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
+            $consulta->bindValue(":hasta", $hasta, PDO::PARAM_STR);
+            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
+        }
+
+        if ($desde =="" && $hasta =="") {
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 WHERE tipo =:tipo AND estado = 'Listo para servir'");
+            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
+        }  
+
+        $consulta->execute();
+        $consulta->setFetchMode(PDO::FETCH_ASSOC);
+        return $consulta->fetchAll();
+    }
+
+    //CANTIDAD OPERACIONES POR EMPLEADO
+
+    public static function TraerCantidadOperacionesEmpleadoFechas($auxId, $desde,$hasta)
+    {
+        $objetoAccesoDatos = AccesoDatos::dameUnObjetoAcceso();
+
+        if ($hasta == "" && $desde !="") {
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 where id_empleado = $auxId : AND estado = 'Listo para servir' AND fecha >=:desde");
+            $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
+            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
+        }
+
+        if ($desde ==""&& $hasta !="") {
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 WHERE tipo = :tipo AND estado = 'Listo para servir' AND fecha <=:hasta ");
+            $consulta->bindValue(":hasta", $hasta, PDO::PARAM_STR);
+            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
+        }
+
+        if ($desde !="" && $hasta !="") {
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 WHERE tipo = :tipo AND estado = 'Listo para servir' AND fecha BETWEEN :desde AND :hasta ");
+            $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
+            $consulta->bindValue(":hasta", $hasta, PDO::PARAM_STR);
+            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
+        }
+
+        if ($desde =="" && $hasta =="") {
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 WHERE tipo =:tipo AND estado = 'Listo para servir'");
+            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
+        }  
+
+        $consulta->execute();
+        $consulta->setFetchMode(PDO::FETCH_ASSOC);
+        return $consulta->fetchAll();
+    }
+
+
+   /* 
 
     public static function TraerMasVendidosSectorFechas($tipo,$desde,$hasta)
     {
@@ -149,6 +220,20 @@ class pedido
         }
         return $consulta->fetchAll();
     }
+*/
+
+    public static function TraerProductoMasVendidoSector($tipo,$desde,$hasta)
+    {
+        $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT pe.id_producto AS id_producto, pr.nombre_producto AS nombre, COUNT (pe.id) FROM `pedidos2` pe, producto pr WHERE pe.estado = 'Listo para servir' GROUP BY `p.id`");
+        $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
+        $consulta->setFetchMode(PDO::FETCH_ASSOC);
+        $consulta->execute();
+        if($consulta->rowCount() == 0){
+            return false;   
+        }
+        return $consulta->fetchAll();
+    }
+/*
 
     public static function TraerUsosMesasFechas($desde,$hasta)
     {
@@ -214,6 +299,6 @@ class pedido
         }
         return $consulta->fetchAll();
     }
-
+*/
 
 }

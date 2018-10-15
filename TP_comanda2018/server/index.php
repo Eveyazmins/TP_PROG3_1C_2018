@@ -15,6 +15,7 @@ require_once 'clases/MWparaAutentificar.php';
 require_once 'clases/excel.php';
 require_once 'clases/pdf.php';
 require_once 'clases/foto.php';
+require_once 'clases/comandaApi.php';
 
 
 $config['displayErrorDetails'] = true;
@@ -73,7 +74,7 @@ $app->group('/empleado', function () {
      //(POST id)
      $this->post('/borrar[/]', \empleadoApi::class . ':BorrarUno');
      //para buscar (POST id) a modificar cualquer dato del alta por post
-     $this->post('/modificar[/]', \empleadoApi::class . ':modificarUno');
+     //$this->post('/modificar[/]', \empleadoApi::class . ':modificarUno');
      //(POST id)
      $this->post('/suspender[/]', \empleadoApi::class . ':suspenderUno');
      //(POST id)
@@ -82,15 +83,14 @@ $app->group('/empleado', function () {
      $this->post('/cantidadOperaciones/[{email}]', \empleadoApi::class . ':operacionesEmpleado');
      //7-a-los​ días y horarios​ que se Ingresaron​ al sistema (POST desde, hasta args email)
      $this->post('/historicoLogin/[{email}]', \empleadoApi::class . ':loginEmpleado');
-     $this->get('/verImagen/[{email}]', \foto::class . ':verImagen');
+     //$this->get('/verImagen/[{email}]', \foto::class . ':verImagen');
 
  })->add(\MWparaAutentificar::class . ':VerificarAdmin')->add(\MWparaCORS::class . ':HabilitarCORSTodos');
 
  $app->group('/pedido', function () {
 
   $this->post('/alta[/]', \pedidoApi::class . ':crearPedido')->add(\MWparaAutentificar::class . ':VerificarSocioMozo');
-  //$this->get('/', \pedidoApi::class . ':traerTodos');
-  $this->get('/', \pedidoApi::class . ':traerTodosConEstadoMesa');
+  $this->get('/', \pedidoApi::class . ':traerTodos');
   $this->post('/traerUno[/]', \pedidoApi::class . ':traerUno');
   $this->post('/cancelar[/]', \pedidoApi::class . ':BorrarUno');
   $this->post('/modificar[/]', \pedidoApi::class . ':modificarUno');
@@ -106,6 +106,12 @@ $app->group('/empleado', function () {
   $this->get('/verImagen/[{email}]', \foto::class . ':verImagen');
 
 })->add(\MWparaCORS::class . ':HabilitarCORSTodos');
+
+$app->group('/comanda', function () {
+
+  $this->post('/alta[/]', \comandaApi::class . ':crearComanda')->add(\MWparaAutentificar::class . ':VerificarMozo');
+})->add(\MWparaCORS::class . ':HabilitarCORSTodos');
+
 
 $app->group('/mesa', function () {
 
