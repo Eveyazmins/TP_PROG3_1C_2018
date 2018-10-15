@@ -51,7 +51,7 @@ class empleadoApi extends empleado
         //Encripta la clave para guardar en DB (y en LogIn Api poder validarla con Validate_pass)
         $clave= password_hash($ArrayDeParametros['clave'],PASSWORD_BCRYPT);
 
-        //valida contenido de nombre
+        //valida contenido de usuario
         $usuario= strtolower($ArrayDeParametros['usuario']);
 
         if ($this->validarNombre($usuario) == false) 
@@ -70,6 +70,24 @@ class empleadoApi extends empleado
         $empleadoAux->usuario = $usuario;
         $empleadoAux->tipo = $tipo;
         $empleadoAux->estado = $estado;
+
+        $archivos = $request->getUploadedFiles();
+        $destino="./fotos/";
+        //var_dump($archivos);
+        //var_dump($archivos['foto']);
+        if(isset($archivos['foto']))
+        {
+            $nombreAnterior=$archivos['foto']->getClientFilename();
+            $extension= explode(".", $nombreAnterior)  ;
+            //var_dump($nombreAnterior);
+            $extension=array_reverse($extension);
+            $archivos['foto']->moveTo($destino.$usuario.".".$extension[0]);
+            $empleadoAux->foto = $destino.$usuario.".".$extension[0];
+        } 
+        else
+        {
+            $empleadoAux->foto = "sin foto";
+        }
         
         $e = empleado::TraerEmail($empleadoAux->email);
 
@@ -81,6 +99,7 @@ class empleadoApi extends empleado
         }else {
             return $response->withJson("El empleado ya existe ",404);
         }
+
         return $response;   
     }
 
@@ -246,72 +265,9 @@ class empleadoApi extends empleado
         $empBuscado = empleado::TraerEmpleadoID($id);
         return $response->withJson($empBuscado, 200);  
     }
+        
 
-    /* 
-    Manejo Imagen 
-    */
-
-    public function obtenerArchivo($nombre) 
-	{
-        if(!isset($_FILES['foto']))
-        {
-            throw new Exception('Error: No existe foto');
-        }
-        if ( 0 < $_FILES['foto']['error'] ) {
-			return null;
-		}
-		else {
-            $foto = $_FILES['foto']['name'];
-			
-            $extension= explode(".", $foto);
-            $tipo = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
-            if($tipo != "jpg" && $tipo != "jpeg" && $tipo != "png") {
-                throw new Exception('Error: de formato, solo se acepta jpg jpeg png');
-            }
-
-            $nombreNuevo = 'fotosEmpleados/'.$nombre.".".strtolower($extension[1]);
-            return $nombreNuevo;
-		}
-    }
-
-
-    public static function fotoPapelera($fotoVieja, $nombre)
-    {
-            $ahora = date("Ymd-His");
-            $extension = pathinfo($fotoVieja, PATHINFO_EXTENSION);
-            rename($fotoVieja , "fotosEmpleados/papelera/".trim($nombre)."-".$ahora.".".$extension);
-    }
-
-
-    public function CargarImagenEmpleado($request, $response, $args)
-    {
-        //pasar como paraetro ID, usuario y foto
-        //ID PARA ENCONTRAR EL OBJ EMP
-        $ArrayDeParametros = $request->getParsedBody();
-        $usuario = strtolower($ArrayDeParametros['usuario']);
-        $foto = $this->obtenerArchivo($usuario);
-				
-        if($foto != NULL)
-        {
-            $directorio = 'fotos/';
-            move_uploaded_file($_FILES['foto']['tmp_name'], $foto);
-            if (filesize($foto)>500000) {
-                $->foto =foto::tamImagenGlobal($foto,$cliente,$directorio);
-                
-            }
-            else {
-                $pedidoAux->foto = $foto;
-            }
-        }
-        else
-        {
-
-        }
-
-    }
-    
-    /*
-    Listado de operaciones por empleado 
+  /*  Listado de operaciones por empleado 
     VOLVER A PROBAR!!!!!!
 
     public function operacionesEmpleado($request, $response, $args)
@@ -412,21 +368,11 @@ class empleadoApi extends empleado
                 if (isset($ArrayDeParametros['desde']) && isset($ArrayDeParametros['hasta'])) 
                 {
                     $desde= $ArrayDeParametros['desde'];
-                    
-                    if ($desde == "") 
-                    {
-                        //throw new Exception('Error: desde no puede esta vacio');
-                        return $response->withJson("Error: desde no puede esta vacio",404);
-                    }
 
                     $hasta= $ArrayDeParametros['hasta'];
-                    
-                    if ($hasta== "") 
+
+                    if (($desde > $hasta) and ($hasta != "")) 
                     {
-                        //throw new Exception('Error: hasta no puede esta vacio');
-                        return $response->withJson("Error: hasta no puede esta vacio",404);
-                    }
-                    if ($desde > $hasta) {
                         //throw new Exception('Error: desde no puede ser mayor que hasta');
                         return $response->withJson("Error: inconsistencia de fechas!",404);
                     }
@@ -436,21 +382,12 @@ class empleadoApi extends empleado
                 {
                     $desde= $ArrayDeParametros['desde'];
                     
-                    if ($desde== "") 
-                    {
-                        //throw new Exception('Error: desde no puede esta vacio');
-                        return $response->withJson("Error: desde no puede esta vacio",404);
-                    }
                     $objDelaRespuesta->ingresos = historico::loginUsuarioFechas($empleadoAux->id,$desde,"");
                 }
                 if (!isset($ArrayDeParametros['desde']) && isset($ArrayDeParametros['hasta'])) 
                 {
                     $hasta= $ArrayDeParametros['hasta'];
-                    if ($hasta== "") 
-                    {
-                        //throw new Exception('Error: hasta no puede esta vacio');
-                        return $response->withJson("Error: hasta no puede esta vacio",404);
-                    }
+                
                     $objDelaRespuesta->ingresos = historico::loginUsuarioFechas($empleadoAux->id,"",$hasta);
                 }
                 if (!isset($ArrayDeParametros['desde']) && !isset($ArrayDeParametros['hasta']))
@@ -577,7 +514,39 @@ class empleadoApi extends empleado
             return $response->withJson($objDelaRespuesta, 202);       
     }
 
-    */
+    //Manejo Imagen 
+
+    public function obtenerArchivo($nombre) 
+	{
+        if(!isset($_FILES['foto']))
+        {
+            throw new Exception('Error: No existe foto');
+        }
+        if ( 0 < $_FILES['foto']['error'] ) {
+			return null;
+		}
+		else {
+            $foto = $_FILES['foto']['name'];
+			
+            $extension= explode(".", $foto);
+            $tipo = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+            if($tipo != "jpg" && $tipo != "jpeg" && $tipo != "png") {
+                throw new Exception('Error: de formato, solo se acepta jpg jpeg png');
+            }
+
+            $nombreNuevo = 'fotosEmpleados/'.$nombre.".".strtolower($extension[1]);
+            return $nombreNuevo;
+		}
+    }
+
+
+    public static function fotoPapelera($fotoVieja, $nombre)
+    {
+            $ahora = date("Ymd-His");
+            $extension = pathinfo($fotoVieja, PATHINFO_EXTENSION);
+            rename($fotoVieja , "fotosEmpleados/papelera/".trim($nombre)."-".$ahora.".".$extension);
+    }
+*/
 
 
 

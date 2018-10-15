@@ -16,7 +16,7 @@ class empleado
     public function InsertarEmpleadoParametros()
 	{
 			$objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso();
-            $consulta =$objetoAccesoDato->RetornarConsulta("INSERT into empleado (email,clave,usuario,tipo,estado,foto)values(:email,:clave,:usuario,:tipo,:estado,foto)");
+            $consulta =$objetoAccesoDato->RetornarConsulta("INSERT into empleado (email,clave,usuario,tipo,estado,foto)values(:email,:clave,:usuario,:tipo,:estado,:foto)");
             $consulta->bindValue(':email', $this->email, PDO::PARAM_STR);
             $consulta->bindValue(':clave', $this->clave, PDO::PARAM_STR);
             $consulta->bindValue(':usuario',$this->usuario, PDO::PARAM_STR);
