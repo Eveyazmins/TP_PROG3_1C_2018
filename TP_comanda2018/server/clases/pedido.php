@@ -2,7 +2,7 @@
 include_once "AccesoDatos.php";
 class pedido
 {
-    public $idPedido;
+    public $id;
     public $idComanda;
     public $idProducto;
     public $cantidad;
@@ -17,7 +17,7 @@ class pedido
     public function InsertarPedidoParametros()
 	{
 			$objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso();
-            $consulta =$objetoAccesoDato->RetornarConsulta("INSERT into pedidos2 (id_comanda,id_producto,cantidad,tipo,hora_estimada,hora_final,estado,id_empleado,monto,fecha)values(:idComanda,:idProducto,:cantidad,:tipo,:horaEstimada,:horaFinal,:estado,:idEmpleado,:monto,:fecha)");
+            $consulta =$objetoAccesoDato->RetornarConsulta("INSERT into pedidos2 (idComanda,idProducto,cantidad,tipo,horaEstimada,horaFinal,estado,idEmpleado,monto,fecha)values(:idComanda,:idProducto,:cantidad,:tipo,:horaEstimada,:horaFinal,:estado,:idEmpleado,:monto,:fecha)");
             $consulta->bindValue(':idComanda',$this->idComanda, PDO::PARAM_INT);
             $consulta->bindValue(':idProducto', $this->idProducto, PDO::PARAM_INT);
             $consulta->bindValue(':cantidad', $this->cantidad, PDO::PARAM_INT);
@@ -47,7 +47,7 @@ class pedido
     public static function TraerPedidoID($idPedido) 
 	{
 			$objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso(); 
-			$consulta =$objetoAccesoDato->RetornarConsulta("select * from pedidos2 where idPedido = '$idPedido'");
+			$consulta =$objetoAccesoDato->RetornarConsulta("select * from pedidos2 where id = '$idPedido'");
 			$consulta->execute();
             $EmpAux= $consulta->fetchObject('pedido');
             if($consulta->rowCount() == 0){
@@ -56,11 +56,11 @@ class pedido
 			return $EmpAux;		
     }
 
-    public function TomarPedido($auxID)
+    public function TomarPedidoParametros($auxID)
     {
         $objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso();
 
-        $consulta =$objetoAccesoDato->RetornarConsulta("UPDATE pedidos2 set estado=:estado,hora_estimada=:horaEstimada,id_empleado=:idEmpleado WHERE id=$auxID");
+        $consulta =$objetoAccesoDato->RetornarConsulta("UPDATE pedidos2 set estado=:estado,horaEstimada=:horaEstimada,idEmpleado=:idEmpleado WHERE id=$auxID");
         $consulta->bindValue(':estado', $this->estado, PDO::PARAM_STR);
         $consulta->bindValue(':horaEstimada', $this->tiempoEstimado, PDO::PARAM_STR);
         $consulta->bindValue(':idEmpleado', $this->idEmpleado, PDO::PARAM_INT);
@@ -73,7 +73,7 @@ class pedido
     {
         $objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso();
 
-        $consulta =$objetoAccesoDato->RetornarConsulta("UPDATE pedidos2 set estado=:estado,hora_final=:horaFinal WHERE id=$auxID");
+        $consulta =$objetoAccesoDato->RetornarConsulta("UPDATE pedidos2 set estado=:estado,horaFinal=:horaFinal WHERE id=$auxID");
         $consulta->bindValue(':estado', $this->estado, PDO::PARAM_STR);
         $consulta->bindValue(':horaFinal', $this->horaFinal, PDO::PARAM_STR);
         $consulta->execute();
@@ -122,7 +122,7 @@ class pedido
         $objetoAccesoDatos = AccesoDatos::dameUnObjetoAcceso();
 
         if ($hasta == "" && $desde !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 where tipo = :tipo AND estado = 'Listo para servir' AND fecha >=:desde GROUP BY id_empleado");
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 where tipo = :tipo AND estado = 'Listo para servir' AND fecha >=:desde GROUP BY idEmpleado");
             $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
             $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
         }
@@ -186,45 +186,10 @@ class pedido
     }
 
 
-   /* 
-
-    public static function TraerMasVendidosSectorFechas($tipo,$desde,$hasta)
-    {
-        $objetoAccesoDatos = AccesoDatos::dameUnObjetoAcceso();
-        if ($desde !="" && $hasta == "") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT `$tipo`,COUNT(`$tipo`) cant FROM `pedidos` WHERE fecha >= '$desde' GROUP BY `$tipo` HAVING `$tipo` != 'nada' AND `$tipo` != 'Sin pedido' AND `$tipo` != 'Finalizado' ORDER BY cant DESC LIMIT 1");
-            $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
-            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
-        }
-        if ($desde ==""&& $hasta !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT `$tipo`,COUNT(`$tipo`) cant FROM `pedidos` WHERE fecha <= '$hasta' GROUP BY `$tipo` HAVING `$tipo` != 'nada' AND `$tipo` != 'Sin pedido' AND `$tipo` != 'Finalizado' ORDER BY cant DESC LIMIT 1");
-            $consulta->bindValue(":hasta", $hasta, PDO::PARAM_STR);
-            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
-        }
-        if ($desde !="" && $hasta !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT `$tipo`,COUNT(`$tipo`) cant FROM `pedidos` WHERE fecha BETWEEN '$desde' AND '$hasta' GROUP BY `$tipo` HAVING `$tipo` != 'nada' AND `$tipo` != 'Sin pedido' AND `$tipo` != 'Finalizado' ORDER BY cant DESC LIMIT 1");
-            $consulta->bindValue(":desde", $desde, PDO::PARAM_INT);
-            $consulta->bindValue(":hasta", $hasta, PDO::PARAM_INT);
-            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
-        }
-        if ($desde =="" && $hasta =="") {
-            $ahora= date("Y-m-d");
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT `$tipo`,COUNT(`$tipo`) cant FROM `pedidos` WHERE fecha <= '$ahora' GROUP BY `$tipo` HAVING `$tipo` != 'nada' AND `$tipo` != 'Sin pedido' AND `$tipo` != 'Finalizado' ORDER BY cant DESC LIMIT 1");
-            $consulta->bindValue(":hasta", $ahora, PDO::PARAM_STR);
-            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
-        }  
-        $consulta->setFetchMode(PDO::FETCH_ASSOC);
-        $consulta->execute();
-        if($consulta->rowCount() == 0){
-            return false;   
-        }
-        return $consulta->fetchAll();
-    }
-*/
 
     public static function TraerProductoMasVendidoSector($tipo,$desde,$hasta)
     {
-        $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT pe.id_producto AS id_producto, pr.nombre_producto AS nombre, COUNT (pe.id) FROM `pedidos2` pe, producto pr WHERE pe.estado = 'Listo para servir' GROUP BY `p.id`");
+        $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT pe.idProducto AS idProducto, pr.nombreProducto AS nombre, COUNT (pe.id) FROM `pedidos2` pe, producto pr WHERE pe.estado = 'Listo para servir' GROUP BY `p.id`");
         $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
         $consulta->setFetchMode(PDO::FETCH_ASSOC);
         $consulta->execute();
@@ -233,72 +198,6 @@ class pedido
         }
         return $consulta->fetchAll();
     }
-/*
 
-    public static function TraerUsosMesasFechas($desde,$hasta)
-    {
-        $objetoAccesoDatos = AccesoDatos::dameUnObjetoAcceso();
-        if ($desde !="" && $hasta == "") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT `nroMesa`,COUNT(`nroMesa`) cant FROM `pedidos` WHERE fecha >= '$desde' GROUP BY `nroMesa` ORDER BY cant DESC");
-            $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
-
-        }
-        if ($desde ==""&& $hasta !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT `nroMesa`,COUNT(`nroMesa`) cant FROM `pedidos` WHERE fecha <= '$hasta' GROUP BY `nroMesa` ORDER BY cant DESC");
-            $consulta->bindValue(":hasta", $hasta, PDO::PARAM_STR);
-        }
-        if ($desde !="" && $hasta !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT `nroMesa`,COUNT(`nroMesa`) cant FROM `pedidos` WHERE fecha BETWEEN '$desde' AND '$hasta' GROUP BY `nroMesa` ORDER BY cant DESC");
-            $consulta->bindValue(":desde", $desde, PDO::PARAM_INT);
-            $consulta->bindValue(":hasta", $hasta, PDO::PARAM_INT);
-
-        }
-        if ($desde =="" && $hasta =="") {
-            $ahora= date("Y-m-d");
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT `nroMesa`,COUNT(`nroMesa`) cant FROM `pedidos` WHERE fecha <= '$ahora' GROUP BY `nroMesa` ORDER BY cant DESC");
-            $consulta->bindValue(":hasta", $ahora, PDO::PARAM_STR);
-
-        }  
-        $consulta->setFetchMode(PDO::FETCH_ASSOC);
-        $consulta->execute();
-        if($consulta->rowCount() == 0){
-            return false;   
-        }
-        return $consulta->fetchAll();
-    }
-
-    public static function TraerFacturacionMesasFechas($desde,$hasta)
-    {
-        $objetoAccesoDatos = AccesoDatos::dameUnObjetoAcceso();
-        if ($desde !="" && $hasta == "") {
-                                                            //SELECT `nroMesa`,COUNT(`nroMesa`) cant FROM `pedidos` GROUP BY `nroMesa` ORDER BY cant DESC
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT `nroMesa`,SUM(`importe`) cant FROM `pedidos` WHERE fecha >= '$desde' GROUP BY `nroMesa` ORDER BY cant DESC");
-            $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
-
-        }
-        if ($desde ==""&& $hasta !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT `nroMesa`,SUM(`importe`) cant FROM `pedidos` WHERE fecha <= '$hasta' GROUP BY `nroMesa` ORDER BY cant DESC");
-            $consulta->bindValue(":hasta", $hasta, PDO::PARAM_STR);
-        }
-        if ($desde !="" && $hasta !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT `nroMesa`,SUM(`importe`) cant FROM `pedidos` WHERE fecha BETWEEN '$desde' AND '$hasta' GROUP BY `nroMesa` ORDER BY cant DESC");
-            $consulta->bindValue(":desde", $desde, PDO::PARAM_INT);
-            $consulta->bindValue(":hasta", $hasta, PDO::PARAM_INT);
-
-        }
-        if ($desde =="" && $hasta =="") {
-            $ahora= date("Y-m-d");
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT `nroMesa`,SUM(`importe`) cant FROM `pedidos` WHERE fecha <= '$ahora' GROUP BY `nroMesa` ORDER BY cant DESC");
-            $consulta->bindValue(":hasta", $ahora, PDO::PARAM_STR);
-
-        }  
-        $consulta->setFetchMode(PDO::FETCH_ASSOC);
-        $consulta->execute();
-        if($consulta->rowCount() == 0){
-            return false;   
-        }
-        return $consulta->fetchAll();
-    }
-*/
 
 }

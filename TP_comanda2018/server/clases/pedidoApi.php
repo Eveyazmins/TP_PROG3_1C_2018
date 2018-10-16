@@ -2,6 +2,7 @@
 include_once "pedido.php";
 include_once "mesa.php";
 include_once "encuesta.php";
+include_once "comanda.php";
 
 class pedidoApi
 {
@@ -85,45 +86,18 @@ class pedidoApi
             
             $pedidoAux->InsertarPedidoParametros();
 
+            $montoViejo = comanda::RetornarPrecioComanda($idComanda); 
+            //var_dump($montoViejo[0]);
+            $montoNuevo =  $montoViejo[0] + $monto;
+            //var_dump($montoNuevo);
+
+            $ok = comanda::CargarPrecioComanda($idComanda, $montoNuevo);
         }
+
         return $response->withJson("El pedido con se genero correctamente",200);
     }
 
-    public function validarNombre($cadena){ 
-        $permitidos = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "; 
-        for ($i=0; $i<strlen($cadena); $i++){ 
-            if (strpos($permitidos, substr($cadena,$i,1))===false){ 
-            //no es válido; 
-            return false; 
-            } 
-        }  
-        //si estoy aqui es que todos los caracteres son validos 
-        return true; 
-    }
 
-    public function validarAlfanum($cadena){ 
-        $permitidos = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "; 
-        for ($i=0; $i<strlen($cadena); $i++){ 
-            if (strpos($permitidos, substr($cadena,$i,1))===false){ 
-            //no es válido; 
-            return false; 
-            } 
-        }  
-        //si estoy aqui es que todos los caracteres son validos 
-        return true; 
-    }
-
-    public function validarMonto($cadena){ 
-        $permitidos = "0123456789,"; 
-        for ($i=0; $i<strlen($cadena); $i++){ 
-            if (strpos($permitidos, substr($cadena,$i,1))===false){ 
-            //no es válido; 
-            return false; 
-            } 
-        }  
-        //si estoy aqui es que todos los caracteres son validos 
-        return true; 
-    }
 
     /*
     Trae todos los pedidos
@@ -142,9 +116,15 @@ class pedidoApi
         return $response->withJson($todosPedidos, 200);  
     }
 
+    /*
+    TRAER UN PEDIDO
+    */
+
     public function traerUno($request, $response, $args) 
 	{
+
         $ArrayDeParametros = $request->getParsedBody();
+        /*
         $arrayConToken = $request->getHeader('token');
 		$token=$arrayConToken[0];
 		//$token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkMTE1NDk3MzcxMWIxMzU5ODVkYjVlNzA0NTI5Nzk0ODVlMjE0Yzg4IiwiZGF0YSI6eyJpZCI6MjMsIm5vbWJyZSI6InVzdWFyaW9Vbm8iLCJzZXhvIjoibWFzY3VsaW5vIiwiZW1haWwiOiJ1c2VyQHVzZXIuY29tIiwidHVybm8iOiJtYW5pYW5hIiwicGVyZmlsIjoidXNlciIsImZvdG8iOiJmb3Rvc0VtcGxlYWRvc1wvdXN1YXJpb1Vuby5wbmciLCJhbHRhIjoiMjAxNy0xMi0xOCAxNTo0NDozNCIsImVzdGFkbyI6ImFjdGl2byJ9LCJhcHAiOiJBUEkgUkVTVCBUUC1Fc3RhY2lvbmFtaWVudG8ifQ.Hl41g_LiwUdnL_l5eOSaxgSbEzBDoibnvXvPFq0rgT0";
@@ -157,20 +137,87 @@ class pedidoApi
             if (!isset($ArrayDeParametros['idPedido'])) {
                 return $response->withJson("idPedido no puede esta vacio",404);   
             }
-            $idPedido= strtolower($ArrayDeParametros['idPedido']);
-            $todosPedidos = pedido::TraerPedidoIDConEstadoMesa($idPedido);
-            return $response->withJson($todosPedidos, 200);  
+            $idPedido= $ArrayDeParametros['idPedido'];
+            $pedidoAux = pedido::TraerPedidoID($idPedido);
+            if(!$pedidoAux)
+            {
+                return $response->withJson("No se encontro pedido",404);
+            }
+            return $response->withJson($pedidoAux, 200);  
         }
+        */
+        if (!isset($ArrayDeParametros['idPedido'])) {
+            return $response->withJson("idPedido no puede esta vacio",404);   
+        }
+        $idPedido= $ArrayDeParametros['idPedido'];
+        $pedidoAux = pedido::TraerPedidoID($idPedido);
+        if(!$pedidoAux)
+        {
+            return $response->withJson("No se encontro pedido",404);
+        }
+        return $response->withJson($pedidoAux, 200);  
 
 
     }
-    //en preparación
-    public function modificarUno($request, $response, $args) 
+
+    /*
+
+    public function tomarUno($request, $response, $args) 
     {
-            $ArrayDeParametros = $request->getParsedBody();
-            $arrayConToken = $request->getHeader('token');
-            $token=$arrayConToken[0];
-            $datosToken = AutentificadorJWT::ObtenerData($token);
+        echo('entro');
+        $ArrayDeParametros = $request->getParsedBody();
+        $arrayConToken = $request->getHeader('token');
+        $token=$arrayConToken[0];
+        $datosToken = AutentificadorJWT::ObtenerData($token);
+
+        if ($datosToken->estado =="suspendido")
+        {
+            return $response->withJson('Esta suspendido, pongase en contacto con el administrador',404);
+        }
+
+        if (!isset($ArrayDeParametros['idPedido'])) {
+            return $response->withJson('Error al modificar: Debe ingresar ID de pedido',404);
+        }
+        $idPedido= $ArrayDeParametros['idPedido'];
+        $objDelaRespuesta= new stdclass();
+        $pedModificar = pedido::TraerPedidoID($idPedido);
+
+        if(!$pedModificar)
+        {
+            return $response->withJson('Error al modificar: No se encontro pedido',404);
+        }
+
+        if (!isset($ArrayDeParametros['horaEstimada'])) {
+            return $response->withJson('Error al modificar: Debe ingresar hora estimada del pedido',404);
+        }
+
+        $horaEstimada = $ArrayDeParametros['horaEstimada'];
+
+        if ($horaEstimada == "")
+        {
+            return $response->withJson('Ingrese hora estimada valida',404);
+        }
+
+        $pedModificar->estado = "en preparacion";
+        $pedModificar->horaEstimada = $horaEstimada;
+        $pedModificar->idEmpleado = $datosToken->id;
+        $pedModificar->TomarPedidoParametros($pedModificar);
+
+        return $response->withJson("La comanda se genero correctamente",200);
+
+    }
+
+    */
+
+
+
+    //en preparación
+    public function tomarUno($request, $response, $args) 
+    {
+        $ArrayDeParametros = $request->getParsedBody();
+        $arrayConToken = $request->getHeader('token');
+        $token=$arrayConToken[0];
+        $datosToken = AutentificadorJWT::ObtenerData($token);
     
             if ($datosToken->estado =="suspendido") {
                  return $response->withJson('Esta suspendido, pongase en contacto con el administrador',404);
@@ -240,7 +287,7 @@ class pedidoApi
             return $response->withJson($objDelaRespuesta, 202);
             
     }
-    
+  */  
     public function finalizarPedido($request, $response, $args)
     {
         $ArrayDeParametros = $request->getParsedBody();
@@ -414,85 +461,8 @@ class pedidoApi
 		}
     }
 
-        //operacionesSector
-        public function masPedidos($request, $response, $args)
-        {
-            $ArrayDeParametros = $request->getParsedBody();
-            $arrayConToken = $request->getHeader('token');
-            $token=$arrayConToken[0];
-            $datosToken = AutentificadorJWT::ObtenerData($token);
-    
-            if ($datosToken->estado =="suspendido") {
-                 return $response->withJson('Esta suspendido, pongase en contacto con el administrador',404);
-            }
-            $objDelaRespuesta= new stdclass();
-    
-            if (isset($ArrayDeParametros['desde']) && isset($ArrayDeParametros['hasta'])) 
-            {
-                $desde= $ArrayDeParametros['desde'];
-    
-                $hasta= $ArrayDeParametros['hasta'];
-    
-                $objDelaRespuesta->detalleBar= pedido::TraerMasVendidosSectorFechas("detalleBar",$desde,$hasta);
-                if ($objDelaRespuesta->detalleBar == false) {
-                    $objDelaRespuesta->detalleBar = "Nada";
-                }
-                $objDelaRespuesta->detalleCoc= pedido::TraerMasVendidosSectorFechas("detalleCoc",$desde,$hasta);
-                if ($objDelaRespuesta->detalleCoc == false) {
-                    $objDelaRespuesta->detalleCoc = "Nada";
-                }
-                $objDelaRespuesta->detalleCer= pedido::TraerMasVendidosSectorFechas("detalleCer",$desde,$hasta);
-                if ($objDelaRespuesta->detalleCer == false) {
-                    $objDelaRespuesta->detalleCer = "Nada";
-                }
-                return $response->withJson($objDelaRespuesta, 200); 
-                
-    
-            }
-            if (isset($ArrayDeParametros['desde']) && !isset($ArrayDeParametros['hasta'])) {
-                    $desde= $ArrayDeParametros['desde'];
-    
-                    $objDelaRespuesta->detalleBar= pedido::TraerMasVendidosSectorFechas("detalleBar",$desde,"");
-                    if ($objDelaRespuesta->detalleBar == false) {
-                        $objDelaRespuesta->detalleBar = "Nada";
-                    }
-                    $objDelaRespuesta->detalleCoc= pedido::TraerMasVendidosSectorFechas("detalleCoc",$desde,"");
-                    if ($objDelaRespuesta->detalleCoc == false) {
-                        $objDelaRespuesta->detalleCoc = "Nada";
-                    }
-                    $objDelaRespuesta->detalleCer= pedido::TraerMasVendidosSectorFechas("detalleCer",$desde,"");
-                    if ($objDelaRespuesta->detalleCer == false) {
-                        $objDelaRespuesta->detalleCer = "Nada";
-                    }
-                    return $response->withJson($objDelaRespuesta, 200); 
-    
-            }
-            if (!isset($ArrayDeParametros['desde']) && isset($ArrayDeParametros['hasta'])) {
-                    $hasta= $ArrayDeParametros['hasta'];
-    
-    
-                    $objDelaRespuesta->detalleBar= pedido::TraerMasVendidosSectorFechas("detalleBar","",$hasta);
-                    if ($objDelaRespuesta->detalleBar == false) {
-                        $objDelaRespuesta->detalleBar = "Nada";
-                    }
-                    $objDelaRespuesta->detalleCoc= pedido::TraerMasVendidosSectorFechas("detalleCoc","",$hasta);
-                    if ($objDelaRespuesta->detalleCoc == false) {
-                        $objDelaRespuesta->detalleCoc = "Nada";
-                    }
-                    $objDelaRespuesta->detalleCer= pedido::TraerMasVendidosSectorFechas("detalleCer","",$hasta);
-                    if ($objDelaRespuesta->detalleCer == false) {
-                        $objDelaRespuesta->detalleCer = "Nada";
-                    }
-                    return $response->withJson($objDelaRespuesta, 200); 
-    
-            }
-            if (!isset($ArrayDeParametros['desde']) && !isset($ArrayDeParametros['hasta'])) {
-                $objDelaRespuesta->detalleBar= pedido::TraerMasVendidosSectorFechas("detalleBar","","");
-                $objDelaRespuesta->detalleCoc= pedido::TraerMasVendidosSectorFechas("detalleCoc","","");
-                $objDelaRespuesta->detalleCer= pedido::TraerMasVendidosSectorFechas("detalleCer","","");
-                return $response->withJson($objDelaRespuesta, 200); 
-            }
-        }
+
+         
 
         public function BorrarUno($request, $response, $args)
         {
@@ -518,93 +488,10 @@ class pedidoApi
             return $response->withJson('No se cancelo el pedido',404);
         }
 
-                //operacionesSector
-        public function usoMesas($request, $response, $args)
-        {
-            $ArrayDeParametros = $request->getParsedBody();
-            $arrayConToken = $request->getHeader('token');
-            $token=$arrayConToken[0];
-            $datosToken = AutentificadorJWT::ObtenerData($token);
-    
-            if ($datosToken->estado =="suspendido") {
-                 return $response->withJson('Esta suspendido, pongase en contacto con el administrador',404);
-            }
-            $objDelaRespuesta= new stdclass();
-    
-            if (isset($ArrayDeParametros['desde']) && isset($ArrayDeParametros['hasta'])) 
-            {
-                $desde= $ArrayDeParametros['desde'];
-                $hasta= $ArrayDeParametros['hasta'];
-    
-                $Mesas= pedido::TraerUsosMesasFechas($desde,$hasta);
-                return $response->withJson($Mesas, 200); 
-                
-    
-            }
-            if (isset($ArrayDeParametros['desde']) && !isset($ArrayDeParametros['hasta'])) {
-                    $desde= $ArrayDeParametros['desde'];
-    
-                    $Mesas= pedido::TraerUsosMesasFechas($desde,"");
-                    return $response->withJson($Mesas, 200); 
-    
-            }
-            if (!isset($ArrayDeParametros['desde']) && isset($ArrayDeParametros['hasta'])) {
-                    $hasta= $ArrayDeParametros['hasta'];
-    
-    
-                    $Mesas= pedido::TraerUsosMesasFechas("",$hasta);
-                    return $response->withJson($Mesas, 200); 
-    
-            }
-            if (!isset($ArrayDeParametros['desde']) && !isset($ArrayDeParametros['hasta'])) {
-                $Mesas= pedido::TraerUsosMesasFechas("","");
-                return $response->withJson($Mesas, 200); 
-            }
-        }
 
-        public function facturacionMesas($request, $response, $args)
-        {
-            $ArrayDeParametros = $request->getParsedBody();
-            $arrayConToken = $request->getHeader('token');
-            $token=$arrayConToken[0];
-            $datosToken = AutentificadorJWT::ObtenerData($token);
-    
-            if ($datosToken->estado =="suspendido") {
-                 return $response->withJson('Esta suspendido, pongase en contacto con el administrador',404);
-            }
-            $objDelaRespuesta= new stdclass();
-    
-            if (isset($ArrayDeParametros['desde']) && isset($ArrayDeParametros['hasta'])) 
-            {
-                $desde= $ArrayDeParametros['desde'];
-                $hasta= $ArrayDeParametros['hasta'];
-    
-                $Mesas= pedido::TraerFacturacionMesasFechas($desde,$hasta);
-                return $response->withJson($Mesas, 200); 
-                
-    
-            }
-            if (isset($ArrayDeParametros['desde']) && !isset($ArrayDeParametros['hasta'])) {
-                    $desde= $ArrayDeParametros['desde'];
-    
-                    $Mesas= pedido::TraerFacturacionMesasFechas($desde,"");
-                    return $response->withJson($Mesas, 200); 
-    
-            }
-            if (!isset($ArrayDeParametros['desde']) && isset($ArrayDeParametros['hasta'])) {
-                    $hasta= $ArrayDeParametros['hasta'];
-    
-    
-                    $Mesas= pedido::TraerFacturacionMesasFechas("",$hasta);
-                    return $response->withJson($Mesas, 200); 
-    
-            }
-            if (!isset($ArrayDeParametros['desde']) && !isset($ArrayDeParametros['hasta'])) {
-                $Mesas= pedido::TraerFacturacionMesasFechas("","");
-                return $response->withJson($Mesas, 200); 
-            }
-        }
-
+        /*
+        FUNCIONES ENCUESTAS
+        */
         public function encuesta($request, $response, $args)
         {
             $ArrayDeParametros = $request->getParsedBody();
@@ -680,5 +567,45 @@ class pedidoApi
             $todosencuestas = encuesta::TraerTodasEncuestaPendiente();
             return $response->withJson($todosencuestas, 200);  
     
+        }
+
+        /*
+        FUNCIONES VALIDACION
+        */
+
+        public function validarNombre($cadena){ 
+            $permitidos = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "; 
+            for ($i=0; $i<strlen($cadena); $i++){ 
+                if (strpos($permitidos, substr($cadena,$i,1))===false){ 
+                //no es válido; 
+                return false; 
+                } 
+            }  
+            //si estoy aqui es que todos los caracteres son validos 
+            return true; 
+        }
+
+        public function validarAlfanum($cadena){ 
+            $permitidos = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "; 
+            for ($i=0; $i<strlen($cadena); $i++){ 
+                if (strpos($permitidos, substr($cadena,$i,1))===false){ 
+                //no es válido; 
+                return false; 
+                } 
+            }  
+            //si estoy aqui es que todos los caracteres son validos 
+            return true; 
+        }
+    
+        public function validarMonto($cadena){ 
+            $permitidos = "0123456789,"; 
+            for ($i=0; $i<strlen($cadena); $i++){ 
+                if (strpos($permitidos, substr($cadena,$i,1))===false){ 
+                //no es válido; 
+                return false; 
+                } 
+            }  
+            //si estoy aqui es que todos los caracteres son validos 
+            return true; 
         }
 }
