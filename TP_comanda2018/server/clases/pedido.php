@@ -222,9 +222,6 @@ class pedido
       
     }
 
-    
-	
-
 
     public static function TraerProductoMasVendidoSector($tipo,$desde,$hasta)
     {
@@ -238,6 +235,28 @@ class pedido
         }
         return $consulta->fetchAll();
     }
+    
+    public static function TraerMasVendido()
+    {
+    $objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso(); 
+	$consulta =$objetoAccesoDato->RetornarConsulta("SELECT pe.idProducto, pr.nombreProducto, COUNT(idProducto) as ventas FROM pedidos2 pe, producto pr where pe.idProducto = pr.id GROUP BY idProducto ORDER BY ventas desc LIMIT 1");  
+	$consulta->execute();
+	$pedidos= $consulta->fetchAll(PDO::FETCH_CLASS);
+            
+    return $pedidos;
+    }
+    
+    public static function TraerMenosVendido()
+    {
+    $objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso(); 
+	$consulta =$objetoAccesoDato->RetornarConsulta("SELECT pe.idProducto, pr.nombreProducto, COUNT(idProducto) as ventas FROM pedidos2 pe, producto pr where pe.idProducto = pr.id GROUP BY idProducto ORDER BY ventas asc LIMIT 1");   
+	$consulta->execute();
+	$pedidos= $consulta->fetchAll(PDO::FETCH_CLASS);
+            
+    return $pedidos;
+    }
+
+
 
     public static function TraerPedidoMasTarde($idComanda)
     {

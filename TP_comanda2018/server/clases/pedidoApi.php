@@ -570,6 +570,19 @@ class pedidoApi
             return $response->withJson($todosencuestas, 200);  
     
         }
+        
+        public function MasVendidos($request, $response, $args) 
+        {
+            $mas = pedido::TraerMasVendido();
+            return $response->withJson($mas, 200);  
+    
+        }
+        
+        public function MenosVendidos($request, $response, $args) 
+        {
+            $menos = pedido::TraerMenosVendido();
+            return $response->withJson($menos, 200);  
+        }
 
         /*
         FUNCIONES VALIDACION
