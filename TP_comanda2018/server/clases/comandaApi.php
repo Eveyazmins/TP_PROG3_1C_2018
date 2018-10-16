@@ -28,8 +28,6 @@ class comandaApi
             //validar solo numero
             $idMesa = $ArrayDeParametros['idMesa'];
 
-            $ok = mesa::cambiarEstadoMesa($idMesa,"Con clientes esperando pedido");
-
             if(!isset($ArrayDeParametros['cliente'])) 
             {
                 return $response->withJson("Cliente no puede esta vacio",404);   
@@ -80,6 +78,7 @@ class comandaApi
             $usosNuevo =  $usosViejo[0] + 1;            
 
             $ok = mesa::CargarUsoMesa($idMesa,$usosNuevo);
+            $ok = mesa::cambiarEstadoMesa($idMesa,"Con clientes esperando pedido");
         }
         return $response->withJson("La comanda se genero correctamente",200);
     }
@@ -256,6 +255,8 @@ class comandaApi
                 return $response->withJson("La mesa no existe ",206);
             }
     }
+
+    
 }
 
     

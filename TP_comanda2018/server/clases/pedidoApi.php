@@ -109,12 +109,26 @@ class pedidoApi
         return $response->withJson($todosPedidos, 200);  
     }
 
-    
-    public function traerTodosConEstadoMesa($request, $response, $args) 
+    /*
+    Trae todos los pedidos cancelados
+    */
+
+    public function traerTodosCancelados($request, $response, $args) 
 	{
-        $todosPedidos = pedido::TraerTodoLosPedidosConEstadoMesa();
+        $todosPedidos = pedido::TraerTodoLosPedidosCancelados();
         return $response->withJson($todosPedidos, 200);  
     }
+
+    /*
+    Trae todos los pedidos demorados
+    */
+
+    public function traerTodosDemorados($request, $response, $args) 
+	{
+        $todosPedidos = pedido::TraerTodoLosPedidosDemorados();
+        return $response->withJson($todosPedidos, 200);  
+    }
+
 
     /*
     TRAER UN PEDIDO
@@ -156,193 +170,150 @@ class pedidoApi
             return $response->withJson("No se encontro pedido",404);
         }
         return $response->withJson($pedidoAux, 200);  
-
-
     }
 
-    /*
 
-    public function tomarUno($request, $response, $args) 
+
+    //en preparación
+    public function modificarUno($request, $response, $args) 
     {
-        echo('entro');
         $ArrayDeParametros = $request->getParsedBody();
         $arrayConToken = $request->getHeader('token');
         $token=$arrayConToken[0];
         $datosToken = AutentificadorJWT::ObtenerData($token);
-
-        if ($datosToken->estado =="suspendido")
+    
+        if ($datosToken->estado =="suspendido") 
         {
             return $response->withJson('Esta suspendido, pongase en contacto con el administrador',404);
         }
-
-        if (!isset($ArrayDeParametros['idPedido'])) {
+        if (!isset($ArrayDeParametros['idPedido'])) 
+        {
             return $response->withJson('Error al modificar: Debe ingresar ID de pedido',404);
         }
         $idPedido= $ArrayDeParametros['idPedido'];
         $objDelaRespuesta= new stdclass();
         $pedModificar = pedido::TraerPedidoID($idPedido);
 
-        if(!$pedModificar)
+        if ($pedModificar != false) 
         {
-            return $response->withJson('Error al modificar: No se encontro pedido',404);
+            $objDelaRespuesta->msj = "se modifico pedido numero ".$idPedido;
+    
+            if (!isset($ArrayDeParametros['horaEstimada'])) 
+            {
+                return $response->withJson('Error: hora estimada no puede esta vacio',404);
+            }
+            
+            $hora_estimada = $ArrayDeParametros['horaEstimada'];
+            
+            if ($hora_estimada == "") 
+            {
+                return $response->withJson('Error: hora estimada no puede esta vacio',404);
+            }
+
+            $ahora=date('Y/m/d G:i'); 
+            $tiempo=strtotime($ahora . ' + '. $hora_estimada . 'minutes');
+            $tiempoEstimado = date('Y-m-d H:i:s',$tiempo);
+
+            $pedModificar->estado = "en preparacion";
+            $pedModificar->horaEstimada = $tiempoEstimado;
+            $pedModificar->idEmpleado = $datosToken->id;
+            
+            $pedModificar->TomarPedidoParametros($idPedido);
+        
         }
-
-        if (!isset($ArrayDeParametros['horaEstimada'])) {
-            return $response->withJson('Error al modificar: Debe ingresar hora estimada del pedido',404);
-        }
-
-        $horaEstimada = $ArrayDeParametros['horaEstimada'];
-
-        if ($horaEstimada == "")
+        else 
         {
-            return $response->withJson('Ingrese hora estimada valida',404);
+            return $response->withJson('Error no existe el numero de pedido',404);
         }
-
-        $pedModificar->estado = "en preparacion";
-        $pedModificar->horaEstimada = $horaEstimada;
-        $pedModificar->idEmpleado = $datosToken->id;
-        $pedModificar->TomarPedidoParametros($pedModificar);
-
-        return $response->withJson("La comanda se genero correctamente",200);
-
+        return $response->withJson($objDelaRespuesta, 202);
+            
     }
-
-    */
-
-
-
-    //en preparación
-    public function tomarUno($request, $response, $args) 
+  
+    public function finalizarUno($request, $response, $args) 
     {
         $ArrayDeParametros = $request->getParsedBody();
         $arrayConToken = $request->getHeader('token');
         $token=$arrayConToken[0];
         $datosToken = AutentificadorJWT::ObtenerData($token);
     
-            if ($datosToken->estado =="suspendido") {
-                 return $response->withJson('Esta suspendido, pongase en contacto con el administrador',404);
-            }
-            if (!isset($ArrayDeParametros['idPedido'])) {
-                return $response->withJson('Error al modificar: Debe ingresar ID de pedido',404);
-            }
-            $idPedido= $ArrayDeParametros['idPedido'];
-            $objDelaRespuesta= new stdclass();
-            $pedModificar = pedido::TraerPedidoID($idPedido);
+        if ($datosToken->estado =="suspendido") 
+        {
+            return $response->withJson('Esta suspendido, pongase en contacto con el administrador',404);
+        }
+        if (!isset($ArrayDeParametros['idPedido'])) 
+        {
+            return $response->withJson('Error al modificar: Debe ingresar ID de pedido',404);
+        }
+        $idPedido= $ArrayDeParametros['idPedido'];
+        $objDelaRespuesta= new stdclass();
+        $pedModificar = pedido::TraerPedidoID($idPedido);
 
-            if ($pedModificar != false) {
-                $objDelaRespuesta->msj = "se modifico pedido numero ".$idPedido;
-                if (isset($ArrayDeParametros['estadoBar'])&& isset($ArrayDeParametros['tiempo_estimado_bar'])) {
-                    $estadoBar = strtolower($ArrayDeParametros['estadoBar']);
-                    $tiempo_estimado_bar = $ArrayDeParametros['tiempo_estimado_bar'];
+        if ($pedModificar != false) 
+        {
+            $objDelaRespuesta->msj = "se modifico pedido numero ".$idPedido;
 
-                    $pedModificar->estadoBar = $estadoBar;
-                    $pedModificar->tiempo_estimado_bar = $tiempo_estimado_bar;
-                    $pedModificar->idEmpladoBar = $datosToken->id;
-                    if ($pedModificar->estadoBar== "" || !isset($pedModificar->estadoBar)) {
-                        return $response->withJson('Error: estadoBar no puede esta vacio',404);
-                    }
-                    if ($pedModificar->tiempo_estimado_bar== "" || !isset($pedModificar->tiempo_estimado_bar)) {
-                        return $response->withJson("Error: tiempo_estimado_bar no puede esta vacio",404);
-                    }
-                    $pedModificar->modificarBarID($idPedido);
-                    $objDelaRespuesta->estadoBar =$estadoBar;
-                }
-                if (isset($ArrayDeParametros['estadoCer']) && isset($ArrayDeParametros['tiempo_estimado_cer'])) {
-                    $estadoCer = strtolower($ArrayDeParametros['estadoCer']);
-                    $tiempo_estimado_cer = $ArrayDeParametros['tiempo_estimado_cer'];
 
-                    $pedModificar->estadoCer = $estadoCer;
-                    $pedModificar->tiempo_estimado_cer = $tiempo_estimado_cer;
-                    $pedModificar->idEmpladoCer = $datosToken->id;
-                    if ($pedModificar->estadoCer== "" || !isset($pedModificar->estadoCer)) {
-                        return $response->withJson("Error: estadoCer no puede esta vacio",404);
-                    }
-                    if ($pedModificar->tiempo_estimado_cer== "" || !isset($pedModificar->tiempo_estimado_cer)) {
-                        return $response->withJson("Error: tiempo_estimado_cer no puede esta vacio",404);
-                    }
-                    $pedModificar->modificarCerID($idPedido);
-                    $objDelaRespuesta->estadoCer =$estadoCer;
-                }
-                if (isset($ArrayDeParametros['estadoCoc']) && isset($ArrayDeParametros['tiempo_estimado_coc'])) {
-                    $estadoCoc = strtolower($ArrayDeParametros['estadoCoc']);
-                    $tiempo_estimado_coc = $ArrayDeParametros['tiempo_estimado_coc'];
-
-                    $pedModificar->estadoCoc = $estadoCoc;
-                    $pedModificar->tiempo_estimado_coc = $tiempo_estimado_coc;
-                    $pedModificar->idEmpladoCoc = $datosToken->id;
-                    if ($pedModificar->estadoCoc== "" || !isset($pedModificar->estadoCoc)) {
-                        return $response->withJson('Error: estadoCoc no puede esta vacio',404);
-                    }
-                    if ($pedModificar->tiempo_estimado_coc== "" || !isset($pedModificar->tiempo_estimado_coc)) {
-                        return $response->withJson("Error: tiempo_estimado_coc no puede esta vacio",404);
-                    }
-                    $pedModificar->modificarCocID($idPedido);
-                    $objDelaRespuesta->estadoCoc =$estadoCoc;
-                }
-
-            }
-            else {
-                return $response->withJson('Error no existe el numero de pedido',404);
-            }
-            return $response->withJson($objDelaRespuesta, 202);
+            $pedModificar->estado = "listo para servir";
+            $pedModificar->horaFinal = date('Y-m-d H:i:s');
+            $pedModificar->idEmpleado = $datosToken->id;
             
+            $pedModificar->FinalizarPedidoParametros($idPedido);
+            $ok = mesa::cambiarEstadoMesa($idMesa,"Con clientes comiendo");
+        }
+        else 
+        {
+            return $response->withJson('Error no existe el numero de pedido',404);
+        }
+        return $response->withJson($objDelaRespuesta, 202);
     }
-  */  
-    public function finalizarPedido($request, $response, $args)
+
+    public function cancelarUno($request, $response, $args) 
     {
         $ArrayDeParametros = $request->getParsedBody();
         $arrayConToken = $request->getHeader('token');
         $token=$arrayConToken[0];
         $datosToken = AutentificadorJWT::ObtenerData($token);
-
-        if ($datosToken->estado =="suspendido") {
-             return $response->withJson('Esta suspendido, pongase en contacto con el administrador',404);
+    
+        if ($datosToken->estado =="suspendido") 
+        {
+            return $response->withJson('Esta suspendido, pongase en contacto con el administrador',404);
         }
-        if (!isset($ArrayDeParametros['idPedido'])) {
-            return $response->withJson('Error al finalizar: Debe ingresar ID de pedido',404);
+        if (!isset($ArrayDeParametros['idPedido'])) 
+        {
+            return $response->withJson('Error al modificar: Debe ingresar ID de pedido',404);
         }
         $idPedido= $ArrayDeParametros['idPedido'];
         $objDelaRespuesta= new stdclass();
-        $pedFinalizar = pedido::TraerPedidoID($idPedido);
-        if (isset($ArrayDeParametros['estadoCoc'])) {
-            $tiempo_final_coc =$this->calculoTiempo($pedFinalizar->tiempo_estimado_coc);
-            $estadoCoc = $ArrayDeParametros['estadoCoc'];
-            $pedFinalizar->estadoCoc = $estadoCoc;
-            $pedFinalizar->tiempo_final_coc = $tiempo_final_coc;
-            //echo ($pedFinalizar->tiempo_final_coc);
-            $pedFinalizar->finalizarCocinarID($idPedido);
-            return $response->withJson('El pedido de cocina esta listo para servir',200);
+        $pedModificar = pedido::TraerPedidoID($idPedido);
 
+        if ($pedModificar != false) 
+        {
+            $objDelaRespuesta->msj = "se modifico pedido numero ".$idPedido;
+
+
+            $pedModificar->estado = "cancelado";
+            $pedModificar->horaFinal = date('Y-m-d H:i:s');
+            $pedModificar->idEmpleado = $datosToken->id;
+            
+            $pedModificar->FinalizarPedidoParametros($idPedido);
         }
-        if (isset($ArrayDeParametros['estadoBar'])) {
-            $tiempo_final_bar =$this->calculoTiempo($pedFinalizar->tiempo_estimado_bar);
-            $estadoBar = $ArrayDeParametros['estadoBar'];
-            $pedFinalizar->estadoBar = $estadoBar;
-            $pedFinalizar->tiempo_final_bar = $tiempo_final_bar;
-            //echo ($pedFinalizar->tiempo_final_bar);
-            $pedFinalizar->finalizarBartenderID($idPedido);
-            return $response->withJson('El pedido de bartender esta listo para servir',200);
-
+        else 
+        {
+            return $response->withJson('Error no existe el numero de pedido',404);
         }
-        if (isset($ArrayDeParametros['estadoCer'])) {
-            $tiempo_final_cer =$this->calculoTiempo($pedFinalizar->tiempo_estimado_cer);
-            $estadoCer = $ArrayDeParametros['estadoCer'];
-            $pedFinalizar->estadoCer = $estadoCer;
-            $pedFinalizar->tiempo_final_cer = $tiempo_final_cer;
-            //echo ($pedFinalizar->tiempo_final_cer);
-            $pedFinalizar->finalizarCerveceriaID($idPedido);
-            return $response->withJson('El pedido de cerveceria esta listo para servir',200);
-        }
-
-        return $response->withJson('No se modifico ningun pedido',404);
-
+        return $response->withJson($objDelaRespuesta, 202);
+            
     }
+
+
+  
     
     public function calculoTiempo($tiempoPedido){
         (int)$tiempoEstimado = $tiempoPedido;
         $ahora= (int)date("i");
         return $resultado = $tiempoEstimado - $ahora; 
     }
+    
     public function tiempoEstimado($request, $response, $args){
         $ArrayDeParametros = $request->getParsedBody();
         if (!isset($ArrayDeParametros['idPedido'])) {
@@ -377,36 +348,7 @@ class pedidoApi
         //return $resultado = $tiempoEstimado - $ahora;
 
 
-    public function cambiarEstadoPedido($request, $response, $args)
-    {
-        $ArrayDeParametros = $request->getParsedBody();
-        $arrayConToken = $request->getHeader('token');
-        $token=$arrayConToken[0];
-        $datosToken = AutentificadorJWT::ObtenerData($token);
-
-        if ($datosToken->estado =="suspendido") {
-             return $response->withJson('Esta suspendido, pongase en contacto con el administrador',404);
-        }
-        if (!isset($ArrayDeParametros['idPedido'])) {
-            return $response->withJson('Error al finalizar: Debe ingresar ID de pedido',404);
-        }
-        $idPedido= $ArrayDeParametros['idPedido'];
-        $objDelaRespuesta= new stdclass();
-        $pedFinalizar = pedido::TraerPedidoID($idPedido);
-        if (isset($ArrayDeParametros['estado'])) {
-            $estado = $ArrayDeParametros['estado'];
-            //$pedFinalizar->estado = $estado;
-            //$pedFinalizar->cambiarEstadoPedidoGlobal($idPedido);
-            mesa::ocuparMesa($pedFinalizar->nroMesa,$estado);
-            if ($estado == "libre") {
-                //cambiarTodosEstadoSector
-                pedido::cambiarTodosEstadoSector($idPedido,"Finalizado");
-                encuesta::altaEncuesta($idPedido,$pedFinalizar->nroMesa,"Pendiente");
-            }
-            return $response->withJson('El pedido ya esta servido',200);
-        }
-        return $response->withJson('No se modifico ningun pedido general',404);
-    }
+    
 
     //operacionesSector
     public function operacionesSector($request, $response, $args)
@@ -462,31 +404,22 @@ class pedidoApi
     }
 
 
+    public function TiempoRestante($request, $response, $args)
+    {
+        $respuesta=new stdclass();
+        $ArrayDeParametros = $request->getParsedBody();
+        $idMesa=$ArrayDeParametros['codigoMesa'];
+        $idComanda=$ArrayDeParametros['idComanda'];
+
+        $auxPedido = pedido::TraerPedidoMasTarde($idComanda);
+        var_dump($auxPedido);
+
+    }
+
+
          
 
-        public function BorrarUno($request, $response, $args)
-        {
-            $ArrayDeParametros = $request->getParsedBody();
-            $arrayConToken = $request->getHeader('token');
-            $token=$arrayConToken[0];
-            $datosToken = AutentificadorJWT::ObtenerData($token);
-    
-            if ($datosToken->estado =="suspendido") {
-                 return $response->withJson('Esta suspendido, pongase en contacto con el administrador',404);
-            }
-            if (!isset($ArrayDeParametros['idPedido'])) {
-                return $response->withJson('Error al finalizar: Debe ingresar ID de pedido',404);
-            }
-            $idPedido= $ArrayDeParametros['idPedido'];
-            $objDelaRespuesta= new stdclass();
-            $pedFinalizar = pedido::TraerPedidoID($idPedido);
-            if ($pedFinalizar) {
-                mesa::ocuparMesa($pedFinalizar->nroMesa,"libre");
-                pedido::cambiarTodosEstadoSector($idPedido,"Cancelado");
-                return $response->withJson('El pedido fue cancelado',200);
-            }
-            return $response->withJson('No se cancelo el pedido',404);
-        }
+
 
 
         /*

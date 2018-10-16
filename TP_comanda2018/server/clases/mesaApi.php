@@ -10,9 +10,14 @@ class mesaApi
         return $response->withJson($todasMesas, 200);  
 
     }
-    public function traerTodosDisponibles($request, $response, $args) 
+    public function traerDisponibles($request, $response, $args) 
 	{
-        $todasMesas = mesa::TraerTodasDispobibles();
+        $todasMesas = mesa::TraerTodasDisponibles();
+        if(!$todasMesas)
+        {
+            return $response->withJson("No hay mesas disponibles", 400);
+
+        }
         return $response->withJson($todasMesas, 200);  
 
     }
@@ -28,6 +33,8 @@ class mesaApi
         $menosUsada = mesa::TraerMesaMenosUtilizada();
         return $response->withJson($menosUsada, 200);
     }
+
+
 
 
 }

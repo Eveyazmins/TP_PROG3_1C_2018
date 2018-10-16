@@ -44,7 +44,7 @@ class mesa
 			return $mesaAux;		
     }		
 
-    public static function TraerTodasDispobibles()
+    public static function TraerTodasDisponibles()
 	{
 			$objetoAccesoDato = AccesoDatos::dameUnObjetoAcceso(); 
 			$consulta =$objetoAccesoDato->RetornarConsulta("select * from mesa where estado = 'cerrado'");
@@ -54,6 +54,7 @@ class mesa
             }			
 			return $consulta->fetchAll(PDO::FETCH_CLASS, "mesa");		
     }
+
 
     public static function cambiarEstadoMesa($auxID,$auxEST)
     {
