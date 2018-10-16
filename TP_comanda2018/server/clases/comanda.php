@@ -191,6 +191,7 @@ class comanda
         return $consulta->fetchAll();
     }
 
+
  
 
 

@@ -155,6 +155,31 @@ class empleado
         return $consulta->fetch();
     }
 
+    public static function operacionesUsuarioEntradaFecha($auxID,$desde,$hasta)
+    {
+        $objetoAccesoDatos = AccesoDatos::dameUnObjetoAcceso();
+        if ($hasta == ""&& $desde !="") {
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) as Num FROM estacionados WHERE idEmpleadoIngreso = $auxID AND fechaHoraIngreso >=:desde");
+            $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
+        }
+        if ($desde ==""&& $hasta !="") {
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) as Num FROM estacionados WHERE idEmpleadoIngreso = $auxID AND fechaHoraIngreso <=:hasta ");
+            $consulta->bindValue(":hasta", $hasta, PDO::PARAM_STR);
+        }
+        if ($desde !="" && $hasta !="") {
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) as Num FROM estacionados WHERE idEmpleadoIngreso = $auxID AND fechaHoraIngreso BETWEEN :desde AND :hasta ");
+            $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
+            $consulta->bindValue(":hasta", $hasta, PDO::PARAM_STR);
+        }
+        if ($desde =="" && $hasta =="") {
+            return empleado::operacionesUsuarioEntrada($auxID);
+        }  
+        $consulta->execute();
+        $consulta->setFetchMode(PDO::FETCH_ASSOC);
+        return $consulta->fetch();
+	}
+    
+
     
     public static function operacionesUsuarioFecha($auxID,$desde,$hasta)
     {

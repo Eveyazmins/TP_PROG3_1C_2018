@@ -267,8 +267,8 @@ class empleadoApi extends empleado
     }
         
 
-  /*  Listado de operaciones por empleado 
-    VOLVER A PROBAR!!!!!!
+    //Listado de operaciones por empleado 
+  
 
     public function operacionesEmpleado($request, $response, $args)
     {
@@ -284,54 +284,34 @@ class empleadoApi extends empleado
                 if (isset($ArrayDeParametros['desde']) && isset($ArrayDeParametros['hasta'])) 
                 {
                     $desde= $ArrayDeParametros['desde'];
-                    if ($desde== "") 
-                    {
-                        //throw new Exception('Error: desde no puede esta vacio');
-                        return $response->withJson("Error: desde no puede esta vacio",404);
-                    }
+                    
                     $hasta= $ArrayDeParametros['hasta'];
-                    if ($hasta== "") 
-                    {
-                        //throw new Exception('Error: hasta no puede esta vacio');
-                        return $response->withJson("Error: hasta no puede esta vacio",404);
-                    }
-                    if ($desde > $hasta) 
+                    
+                    if (($desde > $hasta) AND ($hasta != ""))
                     {
                         //throw new Exception('Error: desde no puede ser mayor que hasta');
                         return $response->withJson("Error: Inconsistencia de fechas!",404);
                     }
-                    $objDelaRespuesta->cantIngresos =empleado::operacionesUsuarioEntradaFecha($empleadoAux->id,$desde,$hasta);
-                    $objDelaRespuesta->cantSalidas =empleado::operacionesUsuarioSalidaFecha($empleadoAux->id,$desde,$hasta);
+                    $objDelaRespuesta->cantIngresos = pedido::TraerCantidadOperacionesEmpleadoFechas($empleadoAux->id, $desde, $hasta);
                     $objDelaRespuesta->msj ="Operaciones desde ".$desde." hasta ".$hasta;
                 }
                 if (isset($ArrayDeParametros['desde']) && !isset($ArrayDeParametros['hasta'])) 
                 {
                     $desde= $ArrayDeParametros['desde'];
-                    if ($desde== "") 
-                    {
-                        //throw new Exception('Error: desde no puede esta vacio');
-                        return $response->withJson("Error: desde no puede esta vacio",404);
-                    }
-                    $objDelaRespuesta->cantIngresos =empleado::operacionesUsuarioEntradaFecha($empleadoAux->id,$desde,"");
-                    $objDelaRespuesta->cantSalidas =empleado::operacionesUsuarioSalidaFecha($empleadoAux->id,$desde,"");
+                    
+                    $objDelaRespuesta->cantIngresos =pedido::TraerCantidadOperacionesEmpleadoFechas($empleadoAux->id, $desde, "");
                     $objDelaRespuesta->msj ="Operaciones desde ".$desde." hasta hoy";
                 }
                 if (!isset($ArrayDeParametros['desde']) && isset($ArrayDeParametros['hasta'])) 
                 {
                     $hasta= $ArrayDeParametros['hasta'];
-                    if ($hasta== "") 
-                    {
-                        //throw new Exception('Error: hasta no puede esta vacio');
-                        return $response->withJson("Error: hasta no puede esta vacio",404);
-                    }
-                    $objDelaRespuesta->cantIngresos =empleado::operacionesUsuarioEntradaFecha($empleadoAux->id,"",$hasta);
-                    $objDelaRespuesta->cantSalidas =empleado::operacionesUsuarioSalidaFecha($empleadoAux->id,"",$hasta);
+                   
+                    $objDelaRespuesta->cantIngresos =pedido::TraerCantidadOperacionesEmpleadoFechas($empleadoAux->id, "", $hasta);
                     $objDelaRespuesta->msj ="Operaciones desde el inicio de actividades hasta ".$hasta;
                 }
                 if (!isset($ArrayDeParametros['desde']) && !isset($ArrayDeParametros['hasta'])) 
                 {
-                    $objDelaRespuesta->cantIngresos =empleado::operacionesUsuarioEntradaFecha($empleadoAux->id,"","");
-                    $objDelaRespuesta->cantSalidas =empleado::operacionesUsuarioSalidaFecha($empleadoAux->id,"","");
+                    $objDelaRespuesta->cantIngresos =pedido::TraerCantidadOperacionesEmpleadoFechas($empleadoAux->id, "", ""); 
                     $objDelaRespuesta->msj ="Operaciones desde el inicio de actividades hasta hoy";
                 }
                 return $response->withJson($objDelaRespuesta,200);
@@ -347,7 +327,7 @@ class empleadoApi extends empleado
         }
     }
 
-    */
+    
 
     /*
     Listado de ingresos por empleado

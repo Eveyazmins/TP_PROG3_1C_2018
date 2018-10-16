@@ -305,7 +305,7 @@ class pedidoApi
             
     }
 
-
+/*
   
     
     public function calculoTiempo($tiempoPedido){
@@ -347,10 +347,19 @@ class pedidoApi
 
         //return $resultado = $tiempoEstimado - $ahora;
 
+*/
+
+//OPERACIONES SECTOR EMPLEADO FECHAS
+
+    //TraerCantidadOperacionesSectorEmpleadoFechas
+
+
+
 
     
 
     //operacionesSector
+
     public function operacionesSector($request, $response, $args)
     {
         $ArrayDeParametros = $request->getParsedBody();
@@ -363,42 +372,102 @@ class pedidoApi
         }
         $objDelaRespuesta= new stdclass();
 
+        if (!isset($ArrayDeParametros['tipo'])) 
+        {
+            return $response->withJson('Ingrese sector (tipo) ',404);
+        }
+
+        $tipo = $ArrayDeParametros['tipo'];
+        
+        if($tipo == "")
+        {
+            return $response->withJson('Ingrese sector (tipo) valido',404);
+        }
+
         if (isset($ArrayDeParametros['desde']) && isset($ArrayDeParametros['hasta'])) 
         {
             $desde= $ArrayDeParametros['desde'];
 
 			$hasta= $ArrayDeParametros['hasta'];
 
-            $objDelaRespuesta->estadoBar= pedido::TraerCantidadOperacionesSectorFechas("estadoBar",$desde,$hasta);
-            $objDelaRespuesta->estadoCoc= pedido::TraerCantidadOperacionesSectorFechas("estadoCoc",$desde,$hasta);
-            $objDelaRespuesta->estadoCer= pedido::TraerCantidadOperacionesSectorFechas("estadoCer",$desde,$hasta);
+            $objDelaRespuesta->operaciones= pedido::TraerCantidadOperacionesSectorFechas($tipo,$desde,$hasta);
+           
             return $response->withJson($objDelaRespuesta, 200); 
-            
-
+        
         }
         if (isset($ArrayDeParametros['desde']) && !isset($ArrayDeParametros['hasta'])) {
 				$desde= $ArrayDeParametros['desde'];
 
-                $objDelaRespuesta->estadoBar= pedido::TraerCantidadOperacionesSectorFechas("estadoBar",$desde,"");
-                $objDelaRespuesta->estadoCoc= pedido::TraerCantidadOperacionesSectorFechas("estadoCoc",$desde,"");
-                $objDelaRespuesta->estadoCer= pedido::TraerCantidadOperacionesSectorFechas("estadoCer",$desde,"");
+                $objDelaRespuesta->operaciones= pedido::TraerCantidadOperacionesSectorFechas($tipo,$desde,"");
                 return $response->withJson($objDelaRespuesta, 200); 
 
         }
         if (!isset($ArrayDeParametros['desde']) && isset($ArrayDeParametros['hasta'])) {
 				$hasta= $ArrayDeParametros['hasta'];
 
-
-                $objDelaRespuesta->estadoBar= pedido::TraerCantidadOperacionesSectorFechas("estadoBar","",$hasta);
-                $objDelaRespuesta->estadoCoc= pedido::TraerCantidadOperacionesSectorFechas("estadoCoc","",$hasta);
-                $objDelaRespuesta->estadoCer= pedido::TraerCantidadOperacionesSectorFechas("estadoCer","",$hasta);
+                $objDelaRespuesta->operaciones= pedido::TraerCantidadOperacionesSectorFechas($tipo,"",$hasta);
                 return $response->withJson($objDelaRespuesta, 200); 
 
         }
         if (!isset($ArrayDeParametros['desde']) && !isset($ArrayDeParametros['hasta'])) {
-            $objDelaRespuesta->estadoBar= pedido::TraerCantidadOperacionesSectorFechas("estadoBar","","");
-            $objDelaRespuesta->estadoCoc= pedido::TraerCantidadOperacionesSectorFechas("estadoCoc","","");
-            $objDelaRespuesta->estadoCer= pedido::TraerCantidadOperacionesSectorFechas("estadoCer","","");
+            $objDelaRespuesta->operaciones= pedido::TraerCantidadOperacionesSectorFechas($tipo,"","");
+            return $response->withJson($objDelaRespuesta, 200); 
+		}
+    }
+
+    //TraerCantidadOperacionesSectorEmpleadoFechas
+
+    public function operacionesSectorEmpleados($request, $response, $args)
+    {
+        $ArrayDeParametros = $request->getParsedBody();
+        $arrayConToken = $request->getHeader('token');
+        $token=$arrayConToken[0];
+        $datosToken = AutentificadorJWT::ObtenerData($token);
+
+        if ($datosToken->estado =="suspendido") {
+             return $response->withJson('Esta suspendido, pongase en contacto con el administrador',404);
+        }
+        $objDelaRespuesta= new stdclass();
+
+        if (!isset($ArrayDeParametros['tipo'])) 
+        {
+            return $response->withJson('Ingrese sector (tipo) ',404);
+        }
+
+        $tipo = $ArrayDeParametros['tipo'];
+        
+        if($tipo == "")
+        {
+            return $response->withJson('Ingrese sector (tipo) valido',404);
+        }
+
+        if (isset($ArrayDeParametros['desde']) && isset($ArrayDeParametros['hasta'])) 
+        {
+            $desde= $ArrayDeParametros['desde'];
+
+			$hasta= $ArrayDeParametros['hasta'];
+
+            $objDelaRespuesta->operaciones= pedido::TraerCantidadOperacionesSectorEmpleadoFechas($tipo,$desde,$hasta);
+           
+            return $response->withJson($objDelaRespuesta, 200); 
+        
+        }
+        if (isset($ArrayDeParametros['desde']) && !isset($ArrayDeParametros['hasta'])) {
+				$desde= $ArrayDeParametros['desde'];
+
+                $objDelaRespuesta->operaciones= pedido::TraerCantidadOperacionesSectorEmpleadoFechas($tipo,$desde,"");
+                return $response->withJson($objDelaRespuesta, 200); 
+
+        }
+        if (!isset($ArrayDeParametros['desde']) && isset($ArrayDeParametros['hasta'])) {
+				$hasta= $ArrayDeParametros['hasta'];
+
+                $objDelaRespuesta->operaciones= pedido::TraerCantidadOperacionesSectorEmpleadoFechas($tipo,"",$hasta);
+                return $response->withJson($objDelaRespuesta, 200); 
+
+        }
+        if (!isset($ArrayDeParametros['desde']) && !isset($ArrayDeParametros['hasta'])) {
+            $objDelaRespuesta->operaciones= pedido::TraerCantidadOperacionesSectorEmpleadoFechas($tipo,"","");
             return $response->withJson($objDelaRespuesta, 200); 
 		}
     }

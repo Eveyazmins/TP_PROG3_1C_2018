@@ -156,26 +156,29 @@ class pedido
         $objetoAccesoDatos = AccesoDatos::dameUnObjetoAcceso();
 
         if ($hasta == "" && $desde !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 where tipo = :tipo AND estado = 'Listo para servir' AND fecha >=:desde GROUP BY idEmpleado");
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT idEmpleado, count(*) as cantidad FROM pedidos2 where tipo = :tipo AND estado = 'Listo para servir' AND fecha >=:desde GROUP BY idEmpleado");
+            
+            
             $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
             $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
         }
 
         if ($desde ==""&& $hasta !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 WHERE tipo = :tipo AND estado = 'Listo para servir' AND fecha <=:hasta ");
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT idEmpleado, count(*) as cantidad FROM pedidos2 where tipo = :tipo AND estado = 'Listo para servir' AND fecha <=:hasta GROUP BY idEmpleado");
             $consulta->bindValue(":hasta", $hasta, PDO::PARAM_STR);
             $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
         }
 
         if ($desde !="" && $hasta !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 WHERE tipo = :tipo AND estado = 'Listo para servir' AND fecha BETWEEN :desde AND :hasta ");
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT idEmpleado, count(*) as cantidad FROM pedidos2 where tipo = :tipo AND estado = 'Listo para servir' AND fecha BETWEEN :desde AND :hasta GROUP BY idEmpleado");
             $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
             $consulta->bindValue(":hasta", $hasta, PDO::PARAM_STR);
             $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
         }
 
         if ($desde =="" && $hasta =="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 WHERE tipo =:tipo AND estado = 'Listo para servir'");
+            //$consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant, idEmpleado FROM pedidos2 WHERE tipo =:tipo AND estado = 'Listo para servir'");
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT idEmpleado, count(idEmpleado) as cantidad FROM pedidos2 where tipo = :tipo AND estado = 'Listo para servir' GROUP BY idEmpleado");
             $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
         }  
 
@@ -191,34 +194,36 @@ class pedido
         $objetoAccesoDatos = AccesoDatos::dameUnObjetoAcceso();
 
         if ($hasta == "" && $desde !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 where id_empleado = $auxId : AND estado = 'Listo para servir' AND fecha >=:desde");
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 where idEmpleado = $auxId AND estado = 'Listo para servir' AND fecha >=:desde");
             $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
-            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
+           
         }
 
         if ($desde ==""&& $hasta !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 WHERE tipo = :tipo AND estado = 'Listo para servir' AND fecha <=:hasta ");
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 WHERE idEmpleado = $auxId AND estado = 'Listo para servir' AND fecha <=:hasta ");
             $consulta->bindValue(":hasta", $hasta, PDO::PARAM_STR);
-            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
+         
         }
 
         if ($desde !="" && $hasta !="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 WHERE tipo = :tipo AND estado = 'Listo para servir' AND fecha BETWEEN :desde AND :hasta ");
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 WHERE idEmpleado = $auxId AND estado = 'Listo para servir' AND fecha BETWEEN :desde AND :hasta ");
             $consulta->bindValue(":desde", $desde, PDO::PARAM_STR);
             $consulta->bindValue(":hasta", $hasta, PDO::PARAM_STR);
-            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
+            
         }
 
         if ($desde =="" && $hasta =="") {
-            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 WHERE tipo =:tipo AND estado = 'Listo para servir'");
-            $consulta->bindValue(":tipo", $tipo, PDO::PARAM_STR);
+            $consulta = $objetoAccesoDatos->RetornarConsulta("SELECT count(*) cant FROM pedidos2 WHERE idEmpleado = $auxId AND estado = 'Listo para servir'");
         }  
 
         $consulta->execute();
         $consulta->setFetchMode(PDO::FETCH_ASSOC);
         return $consulta->fetchAll();
+      
     }
 
+    
+	
 
 
     public static function TraerProductoMasVendidoSector($tipo,$desde,$hasta)
