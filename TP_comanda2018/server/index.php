@@ -92,31 +92,43 @@ $app->group('/empleado', function () {
   $this->post('/alta[/]', \pedidoApi::class . ':crearPedido')->add(\MWparaAutentificar::class . ':VerificarSocioMozo');
   $this->get('/', \pedidoApi::class . ':traerTodos');
   $this->post('/traerUno[/]', \pedidoApi::class . ':traerUno');
-  $this->post('/cancelar[/]', \pedidoApi::class . ':BorrarUno');
-  $this->post('/modificar[/]', \pedidoApi::class . ':modificarUno');
-  $this->post('/finalizar[/]', \pedidoApi::class . ':finalizarPedido');
-  $this->post('/estadoGlobal[/]', \pedidoApi::class . ':cambiarEstadoPedido');
-  $this->post('/operacionesSector[/]', \pedidoApi::class . ':operacionesSector');
-  $this->post('/operacionesEmpleado[/]', \pedidoApi::class . ':operacionesEmpleado');
-  $this->post('/masVendidos[/]', \pedidoApi::class . ':masPedidos');
-  $this->post('/usoMesas[/]', \pedidoApi::class . ':usoMesas');
-  $this->post('/facturacionMesas[/]', \pedidoApi::class . ':facturacionMesas');
-  $this->post('/tiempoEstimado[/]', \pedidoApi::class . ':tiempoEstimado');
-
-  $this->get('/verImagen/[{email}]', \foto::class . ':verImagen');
-
+  $this->post('/cancelar[/]', \pedidoApi::class . ':cancelarUno')->add(\MWparaAutentificar::class . ':VerificarSocioMozo');
+  $this->post('/modificar[/]', \pedidoApi::class . ':modificarUno')->add(\MWparaAutentificar::class . ':VerificarEmpleado');
+  $this->post('/finalizar[/]', \pedidoApi::class . ':finalizarUno')->add(\MWparaAutentificar::class . ':VerificarEmpleado');
+  //$this->post('/estadoGlobal[/]', \pedidoApi::class . ':cambiarEstadoPedido');
+  $this->post('/operacionesSector[/]', \pedidoApi::class . ':operacionesSector')->add(\MWparaAutentificar::class . ':VerificarAdmin');
+  $this->post('/operacionesSectorEmpleado[/]', \pedidoApi::class . ':operacionesSectorEmpleados')->add(\MWparaAutentificar::class . ':VerificarAdmin');
+  $this->post('/masVendidos[/]', \pedidoApi::class . ':masPedidos')->add(\MWparaAutentificar::class . ':VerificarAdmin');
+  $this->post('/tiempoRestante[/]', \pedidoApi::class . ':TiempoRestante');
+  $this->get('/cancelados', \pedidoApi::class . ':traerTodosCancelados')->add(\MWparaAutentificar::class . ':VerificarSocioMozo');
+  $this->get('/demorados', \pedidoApi::class . ':traerTodosDemorados')->add(\MWparaAutentificar::class . ':VerificarSocioMozo');
 })->add(\MWparaCORS::class . ':HabilitarCORSTodos');
 
 $app->group('/comanda', function () {
 
   $this->post('/alta[/]', \comandaApi::class . ':crearComanda')->add(\MWparaAutentificar::class . ':VerificarMozo');
+  $this->get('/', \comandaApi::class . ':traerTodas')->add(\MWparaAutentificar::class . ':VerificarSocioMozo');
+  $this->post('/traerPedidos[/]', \comandaApi::class . ':traerPedidosComanda')->add(\MWparaAutentificar::class . ':VerificarSocioMozo');
+  $this->post('/traerUna[/]', \comandaApi::class . ':traerUna')->add(\MWparaAutentificar::class . ':VerificarSocioMozo');
+  $this->post('/cerrarUna[/]', \comandaApi::class . ':cerrarComanda')->add(\MWparaAutentificar::class . ':VerificarAdmin');
+  $this->post('/altaEncuesta[/]', \comandaApi::class . ':CargarEncuesta')->add(\MWparaAutentificar::class . ':VerificarSocioMozo');
+  $this->post('/finalizarEncuesta[/]', \comandaApi::class .':finalizarEncuesta');
+  $this->get('/mejoresComentarios', \comandaApi::class .':mejoresComentarios')->add(\MWparaAutentificar::class . ':VerificarAdmin');
+  $this->get('/peoresComentarios', \comandaApi::class .':peoresComentarios')->add(\MWparaAutentificar::class . ':VerificarAdmin');
 })->add(\MWparaCORS::class . ':HabilitarCORSTodos');
 
 
 $app->group('/mesa', function () {
 
-  $this->get('/', \mesaApi::class . ':traerTodos');
-  $this->get('/disponibles/', \mesaApi::class . ':traerTodosDisponibles');
+  $this->get('/', \mesaApi::class . ':traerTodos')->add(\MWparaAutentificar::class . ':VerificarSocioMozo');
+  $this->get('/disponibles/', \mesaApi::class . ':traerDisponibles')->add(\MWparaAutentificar::class . ':VerificarSocioMozo');
+  $this->get('/masFacturada/', \comandaApi::class . ':MesaMasFacturo')->add(\MWparaAutentificar::class . ':VerificarAdmin');
+  $this->get('/menosFacturada/', \comandaApi::class . ':MesaMenosFacturo')->add(\MWparaAutentificar::class . ':VerificarAdmin');
+  $this->get('/mayorImporte/', \comandaApi::class . ':MesaMasImporte')->add(\MWparaAutentificar::class . ':VerificarAdmin');
+  $this->get('/menorImporte/', \comandaApi::class . ':MesaMenosImporte')->add(\MWparaAutentificar::class . ':VerificarAdmin');
+  $this->get('/masUsada/', \MesaApi::class . ':MesaMasUsada')->add(\MWparaAutentificar::class . ':VerificarAdmin');
+  $this->get('/menosUsada/', \MesaApi::class . ':MesaMenosUsada')->add(\MWparaAutentificar::class . ':VerificarAdmin');
+  $this->post('/FacturadoDesdeHasta', \comandaApi::class . ':TraerFacturadoDesdeHasta')->add(\MWparaAutentificar::class . ':VerificarAdmin');
 
 })->add(\MWparaCORS::class . ':HabilitarCORSTodos');
 

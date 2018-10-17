@@ -256,6 +256,162 @@ class comandaApi
             }
     }
 
+
+
+    //FUNCIONES ENCUESTA
+
+    public function CargarEncuesta($request, $response, $args)
+    {
+        $ArrayDeParametros = $request->getParsedBody();
+        $arrayConToken = $request->getHeader('token');
+        $token=$arrayConToken[0];
+        //$token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkMTE1NDk3MzcxMWIxMzU5ODVkYjVlNzA0NTI5Nzk0ODVlMjE0Yzg4IiwiZGF0YSI6eyJpZCI6MjMsIm5vbWJyZSI6InVzdWFyaW9Vbm8iLCJzZXhvIjoibWFzY3VsaW5vIiwiZW1haWwiOiJ1c2VyQHVzZXIuY29tIiwidHVybm8iOiJtYW5pYW5hIiwicGVyZmlsIjoidXNlciIsImZvdG8iOiJmb3Rvc0VtcGxlYWRvc1wvdXN1YXJpb1Vuby5wbmciLCJhbHRhIjoiMjAxNy0xMi0xOCAxNTo0NDozNCIsImVzdGFkbyI6ImFjdGl2byJ9LCJhcHAiOiJBUEkgUkVTVCBUUC1Fc3RhY2lvbmFtaWVudG8ifQ.Hl41g_LiwUdnL_l5eOSaxgSbEzBDoibnvXvPFq0rgT0";
+        $datosToken = AutentificadorJWT::ObtenerData($token);
+
+        if ($datosToken->estado =="suspendido") 
+        {
+             return $response->withJson("Esta suspendido, pongase en contacto con el administrador",404);
+        }
+
+        if (!isset($ArrayDeParametros['idComanda'])) {
+            return $response->withJson("idComanda no puede esta vacio",404);   
+        }
+        //validar numero
+        $idPedido= $ArrayDeParametros['idComanda'];
+
+        if($idPedido == "")
+        {
+            return $response->withJson("id comanda no puede esta vacio",404);
+        }
+
+        if (!isset($ArrayDeParametros['idMesa'])) {
+            return $response->withJson("Mesa no puede esta vacio",404);   
+        }
+        //validar numero
+        $idMesa= $ArrayDeParametros['idMesa'];
+        if($idMesa == "")
+        {
+            return $response->withJson("Mesa no puede esta vacio",404);
+        }
+
+        $encuestaAux = new encuesta();
+
+        $encuestaAux->idMesa = $idMesa;
+        $encuestaAux->idPedido = $idPedido;
+        $encuestaAux->estado = 'en cliente';
+        $encuestaAux->puntosMesa = 0;
+        $encuestaAux->puntosRestaurante = 0;
+        $encuestaAux->puntosMozo = 0;
+        $encuestaAux->puntosCocinero = 0;
+        $encuestaAux->comentario = "pendiente";
+
+        $encuestaAux->insertarEncuestaParametros();
+
+        $ok = mesa::cambiarEstadoMesa($idMesa,"Con clientes pagando");
+
+        return $response->withJson("Se cargo la encuesta",200);
+    }
+
+
+    public function finalizarEncuesta($request, $response, $args)
+    {
+
+        $ArrayDeParametros = $request->getParsedBody();
+        if (!isset($ArrayDeParametros['idComanda'])) {
+            return $response->withJson("Comanda no puede esta vacio",404);   
+        }
+        $idComanda= $ArrayDeParametros['idComanda'];
+
+        if (!isset($ArrayDeParametros['idMesa'])) {
+            return $response->withJson("Mesa no puede esta vacio",404);   
+        }
+
+        $idMesa= $ArrayDeParametros['idMesa'];
+
+        $encuestaAux = encuesta::TraerEncuestaPendiente($idComanda,$idMesa);
+
+        if(!$encuestaAux)
+        {
+            return $response->withJson("La encuesta no existe",404); 
+        }
+
+        if (!isset($ArrayDeParametros['puntosMesa'])) {
+            return $response->withJson("puntosMesa no puede esta vacio",404);   
+        }
+        $puntosMesa= $ArrayDeParametros['puntosMesa'];
+
+        if (!isset($ArrayDeParametros['puntosRestaurante'])) {
+            return $response->withJson("puntosrRestaurante no puede esta vacio",404);   
+        }
+        $puntosRestaurante= $ArrayDeParametros['puntosRestaurante'];
+
+        if (!isset($ArrayDeParametros['puntosMozo'])) {
+            return $response->withJson("puntosMozo no puede esta vacio",404);   
+        }
+        $puntosMozo= $ArrayDeParametros['puntosMozo'];
+
+        if (!isset($ArrayDeParametros['puntosCocinero'])) {
+            return $response->withJson("puntosCocinero no puede esta vacio",404);   
+        }
+        $puntosCocinero= $ArrayDeParametros['puntosCocinero'];
+
+        if (!isset($ArrayDeParametros['comentario'])) {
+            return $response->withJson("comentario no puede esta vacio",404);   
+        }
+        $comentario= strtolower($ArrayDeParametros['comentario']);
+    
+        
+        $encuestaAux->estado = "finalizado";
+        $encuestaAux->puntosMesa = $puntosMesa;
+        $encuestaAux->puntosRestaurante = $puntosRestaurante;
+        $encuestaAux->puntosMozo = $puntosMozo;
+        $encuestaAux->puntosCocinero = $puntosCocinero;
+        $encuestaAux->comentario = $comentario;
+        $encuestaAux->completarEncuesta($idComanda,$idMesa);
+        
+        return $response->withJson("Gracias por responder la encuesta",200);
+    }
+    
+
+    public function traerTodasEncuestas($request, $response, $args) 
+    {
+        $todosencuestas = encuesta::TraerTodasEncuestasPendientes();
+        return $response->withJson($todosencuestas, 200);  
+
+    }
+
+    public function TraerEncuesta($request, $response, $args)
+    {
+        $ArrayDeParametros = $request->getParsedBody();
+        if (!isset($ArrayDeParametros['idComanda'])) {
+            return $response->withJson("comanda no puede esta vacio",404);   
+        }
+        $idComanda= $ArrayDeParametros['idComanda'];
+        
+        if (!isset($ArrayDeParametros['idMesa'])) {
+            return $response->withJson("Mesa no puede esta vacio",404);   
+        }
+        $idMesa= $ArrayDeParametros['idMesa'];
+
+        $todosPedidos = encuesta::TraerEncuestaPendiente($idComanda,$idMesa);
+        return $response->withJson($todosPedidos, 200); 
+    }
+
+
+    public function mejoresComentarios($request, $response, $args)
+    {
+        $comentarios = encuesta::traerMejoresComentarios();
+        return $response->withJson($comentarios, 200); 
+    }
+
+    public function peoresComentarios($request, $response, $args)
+    {
+        $comentarios = encuesta::traerPeoresComentarios();
+        return $response->withJson($comentarios, 200); 
+    }
+
+
+
     
 }
 
