@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+            ::placeholder {
+                color: whitesmoke;
+                opacity: 1; /* Firefox */
+            }
+            
+            :-ms-input-placeholder { /* Internet Explorer 10-11 */
+               color: whitesmoke;
+            }
+            
+            ::-ms-input-placeholder { /* Microsoft Edge */
+               color: whitesmoke;
+            }
+            </style>
+    <!-- <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css"> -->
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"> -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/estilos.css">
+    <!-- <script src="node_modules/jquery/dist/jquery.min.js"></script>-->
+    <!-- <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script> -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script> -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="js/app.js"></script>
+    <!-- <script src="js/admin.js"></script>
+    <script src="js/enumerado.js"></script>
+    <script src="js/empleado.js"></script> -->
+    <title>La Comanda</title>
+</head>
+
+<body>
+        <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <!-- <div class="pr-wrap">
+                            <div class="pass-reset">
+                                <label>
+                                    Enter the email you signed up with</label>
+                                <input type="email" placeholder="Email" />
+                                <input type="submit" value="Submit" class="pass-reset-submit btn btn-success btn-sm" />
+                            </div>
+                        </div> -->
+                        <div class="wrap">
+                            <p class="form-title">Iniciar sesión</p>
+                            <form class="login" accept-charset="UTF-8" role="form" method="POST" onsubmit="Login(); return false;">
+                            <input type="email" placeholder="Usuario" id="email" name="email" required/>
+                            <section id="errorEmail"></section>
+                            <input type="password" placeholder="Contraseña" id="clave" name="clave"  required/>
+                            <section id="errorClave"></section>
+                            <input type="submit" value="Ingresar" class="btn btn-success btn-sm" />
+                            <!-- <div class="remember-forgot">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" />
+                                                Remember Me
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 forgot-pass-content">
+                                        <a href="javascript:void(0)" class="forgot-pass">Forgot Password</a>
+                                    </div>
+                                </div>
+                            </div> -->
+                            <div class="form-group ">
+                                    <br>
+                                    <input type="button" class="btn btn-info btn-sm" value="Test Admin" id="TestAdmin">
+                                    <input type="button" class="btn btn-info btn-sm" value="Test Cocinero" id="TestCocinero">
+                                    <input type="button" class="btn btn-info btn-sm" value="Test Bartender" id="TestBartender">
+                                    <input type="button" class="btn btn-info btn-sm" value="Test Mozo" id="TestMozo">
+                                    <input type="button" class="btn btn-info btn-sm" value="Test Cervecero" id="TestCervecero">
+                                    
+                            </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="posted-by">Posted By: <a href="http://www.jquery2dotnet.com">Bhaumik Patel</a></div> -->
+            </div>
+
+                <!-- Modal para error de login-->
+    <div id="modalerrorLogin" class="modal fade" role="dialog">
+            <div class="modal-dialog modal-sm">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">
+                            <span class="glyphicon glyphicon glyphicon glyphicon-alert"></span> Error</h4>
+                    </div>
+                    <div class="modal-body">
+                        <section id="errorLogin"></section>
+                        <!-- <p id="errorLogin"></p> -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-info" data-dismiss="modal">cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</body>
+
+</html>

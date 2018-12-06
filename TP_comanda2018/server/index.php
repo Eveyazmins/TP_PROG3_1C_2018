@@ -53,7 +53,7 @@ $app->get('[/]', function (Request $request, Response $response) {
 
 })->add(\MWparaCORS::class . ':HabilitarCORSTodos');
 //Para LogIn Email y clave
-$app->post('/Login[/]', \loginApi::class . ':login');//->add(\MWparaCORS::class . ':HabilitarCORSTodos');
+$app->post('/Login[/]', \loginApi::class . ':login')->add(\MWparaCORS::class . ':HabilitarCORSTodos');
 //Para ver datos del empleado validando Token, ingresar Token + valor token en el header
 $app->post('/datosToken[/]', \loginApi::class . ':datosToken')->add(\MWparaAutentificar::class . ':VerificarUser')->add(\MWparaCORS::class . ':HabilitarCORSTodos');
 
