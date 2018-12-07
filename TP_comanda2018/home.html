@@ -28,7 +28,7 @@
     <script src="js/pedidosMenos.js"></script>
     <script src="js/listadoOperaciones.js"></script>
     <script src="js/listadoLogin.js"></script>
-    <script src="js/pedidos.js"></script>
+    <script src="js/pedido.js"></script>
     <script src="js/app.js"></script>
     <script src="js/empleado.js"></script>
     <title>Laboratorio III</title>
@@ -79,12 +79,17 @@
                             <a id="btnABMempleados" href="#">ABM empleados</a>
                         </li>
                         <li>
-                            <a href="#" onclick="mostrarFormPedidos()" data-toggle="modal" data-target="#modalIngresar">Ingresar pedido</a>
+                            <a href="#" onclick="mostrarFormComandas()" data-toggle="modal" data-target="#modalIngresarCom">Ingresar comanda</a>
+                            <!-- <a href="#">Proximamente</a> -->
+                        </li>
+                        <li>
+                            <a href="#" onclick="mostrarFormPedidos()" data-toggle="modal" data-target="#modalIngresarPed">Ingresar pedido</a>
                             <!-- <a href="#">Proximamente</a> -->
                         </li>
                         <li class="">
                             <!-- <a href="#" onclick="esconderNav()" data-toggle="modal" data-target="#modalSacar">Sacar vehiculo</a> -->
                             <a id="btnPendientes" href="#">Pendientes</a>
+        
                         </li>
                         <li class="dropdown">
                             <a onclick="sosSocio()" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Listados
@@ -143,7 +148,7 @@ background: linear-gradient(to right, #667db6, #0082c8, #0082c8, #667db6); /* W3
                     <br>
                     <div class="col-xs-12 col-sm-3">
                         <h4 id="msjHola">
-                            <kbd>Bienvendio</kbd>
+                            <kbd>Bienvenido</kbd>
                             <div id="spinHola"></div>
                         </h4>
 
@@ -162,8 +167,8 @@ background: linear-gradient(to right, #667db6, #0082c8, #0082c8, #667db6); /* W3
                             <label for="clave">Clave</label>
                             <input type="text" class="form-control" name="clave" id="claveTXT" placeholder="Ingrese clave">
 
-                            <label for="nombre">Nombre</label>
-                            <input type="text" class="form-control" name="nombre" id="nombreTXT" placeholder="Ingrese nombre">
+                            <label for="usuario">Usuario</label>
+                            <input type="text" class="form-control" name="usuario" id="nombreTXT" placeholder="Ingrese usuario">
 
                             <label for="tipo">Tipo</label>
                             <select class="form-control" id="tipoCB" name="tipo">
@@ -250,8 +255,8 @@ background: linear-gradient(to right, #667db6, #0082c8, #0082c8, #667db6); /* W3
                         </section>
                     </div>
                     <section id="sTablaEmpleados" style='display:none;'>
-                        <h4 id="msjVehiculo">
-                            <kbd>Litado de empleados</kbd>
+                        <h4 id="msjEmpleado">
+                            <kbd>Listado de empleados</kbd>
                             </h2>
                             <div class="table-responsive">
                                 <div>
@@ -296,8 +301,57 @@ background: linear-gradient(to right, #667db6, #0082c8, #0082c8, #667db6); /* W3
             </div>
         </div>
 
+
+                <!-- Modal ingresar COMANDA -->
+                <div id="modalIngresarCom" class="modal fade" role="dialog">
+                    <div class="modal-dialog">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title lead">
+                                    <kbd>Ingresar Comanda</kbd>
+                                </h4>
+                            </div>
+                            <div class="modal-body">
+                                <section id="msjErrorIngresar"></section>
+                                <div class="form-group">
+                                    <label for="cliente">Cliente</label>
+                                    <input type="text" class="form-control" name="cliente" id="clienteTXT" placeholder="ingrese cliente">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cliente">Mesa</label>
+                                    <input type="text" class="form-control" name="mesa" id="mesaTXT" type="number" placeholder="ingrese mesa">
+                                </div>    
+                    
+                                <div class="row">
+                                    <div class="form-group">
+        
+                                        <div class="col-sm-10">
+                                            <label for="fileinput">Foto</label>
+                                            <input required type="file" class="form-control" id="fotoFile" name="foto">
+                                            <br>
+                                        </div>
+                                    </div>
+                                </div>
+        
+                                <div id="preview">
+        
+                                </div>
+                                <br>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-success" id="btnAgregar" onclick="agregarComanda()">Agregar Comanda</button>
+                                <!-- <input type="button" class="btn btn-primary" value="Agregar" id="btnAgregar"> -->
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+                            </div>
+                        </div>
+        
+                    </div>
+                </div>
+
         <!-- Modal ingresar auto -->
-        <div id="modalIngresar" class="modal fade" role="dialog">
+        <div id="modalIngresarPed" class="modal fade" role="dialog">
             <div class="modal-dialog">
                 <!-- Modal content-->
                 <div class="modal-content">
@@ -310,94 +364,28 @@ background: linear-gradient(to right, #667db6, #0082c8, #0082c8, #667db6); /* W3
                     <div class="modal-body">
                         <section id="msjErrorIngresar"></section>
                         <div class="form-group">
-                            <label for="cliente">Cliente</label>
-                            <input type="text" class="form-control" name="cliente" id="clienteTXT" placeholder="ingrese cliente">
+                            <label for="comanda">Comanda</label>
+                            <input type="text" class="form-control" name="comanda" id="comandaTXT" placeholder="ingrese comanda">
                         </div>
-                        <!-- <div class="form-group">
-                            <label for="marca">Marca</label>
-                            <input type="text" class="form-control" name="marca" id="marcaTXT" placeholder="ingrese marca">
-                        </div> -->
                         <div class="form-group">
-                            <label for="mesaCB">Mesas disponibles</label>
-                            <select class="form-control" id="mesaCB" name="mesa">
-                            </select>
-                        </div> 
-                        <!-- <div class="form-group">
-                            <label for="mesaCB">Mesa</label>
-                            <select class="form-control" id="mesaCB" name="mesa">
-                                <option value="" disabled selected>Seleccione mesa</option>
-                                <option value="mesa1">mesa1</option>
-                                <option value="mesa2">mesa2</option>
-                                <option value="mesa3">mesa3</option>
-                            </select>
-                        </div> -->
-                        <!-- <div class="form-group">
-                            <label for="">Tipo de pedido</label>
-                            <br>
-                            <label class="checkbox-inline"><input type="checkbox" id="chBartender" unchecked>Bartender</label>
-                            <label class="checkbox-inline"><input type="checkbox" id="chCerveceria"  unchecked>Cerveceria</label>
-                            <label class="checkbox-inline"><input type="checkbox" id="chCocina" unchecked>Cocina</label>
-                        </div> -->
-                        <!-- <section id="formBartender" style='display:none;'> -->
-                            <div class="form-group">
-                                <label for="bartenderCB">Producto de Bartender</label>
-                                <select class="form-control" id="bartenderCB" name="detalleBartender">
-                                    <!-- <option value="" disabled selected>Seleccione bebida</option> -->
-                                    <option value="nada">Nada</option>
-                                    <option value="VinoTinto">Vino Tinto</option>
-                                    <option value="VinoBlanco">Vino Blanco</option>
-                                    <option value="Fernet">Fernet</option>
-                                    <option value="Campari">Campari</option>
-                                    <option value="Martini">Martini</option>
-                                    <option value="Otro">Otro</option>
-                                </select>
-                            </div>
-                        <!-- </section> -->
-                        <!-- <section id="formCerveceria" style='display:none;'> -->
-                            <div class="form-group">
-                                <label for="cerveceriaCB">Tipo de cerveza</label>
-                                <select class="form-control" id="cerveceriaCB" name="detalleCerveceria">
-                                    <!-- <option value="" disabled selected>Seleccione cerveza</option> -->
-                                    <option value="nada">Nada</option>
-                                    <option value="Rubia">Rubia</option>
-                                    <option value="Roja">Roja</option>
-                                    <option value="Negra">Negra</option>
-                                    <option value="Otro">Otro</option>
-                                </select>
-                            </div>
-                        <!-- </section> -->
-                        <!-- <section id="formCocinas" style='display:none;'> -->
-                            <div class="form-group">
-                                    <label for="cocinaCB">Plato</label>
-                                    <select class="form-control" id="cocinaCB" name="detalleCocina">
-                                        <!-- <option value="" disabled selected>Seleccione plato</option> -->
-                                        <option value="nada">Nada</option>
-                                        <option value="Milanesa">Milanesa</option>
-                                        <option value="Vacio">Vacio</option>
-                                        <option value="Pizza">Pizza</option>
-                                        <option value="Pastas">Pastas</option>
-                                        <option value="Asado">Asado</option>
-                                        <option value="Empanadas">Empanadas</option>
-                                    </select>
-                                </div>
-                        <!-- </section> -->
-                        <div class="row">
-                            <div class="form-group">
+                            <label for="producto">Producto</label>
+                            <input type="text" class="form-control" name="producto" id="productoTXT" placeholder="ingrese producto">
+                        </div>
+                        <div class="form-group">
+                            <label for="cantidad">Cantidad</label>
+                            <input type="text" class="form-control" name="cantidad" id="cantidadTXT" placeholder="ingrese cantidad">
+                        </div>
+                        <div class="form-group">
+                            <label for="tipo">Tipo</label>
+                            <input type="text" class="form-control" name="tipo" id="tipoTXT" placeholder="ingrese tipo">
+                        </div>
+                        <div class="form-group">
+                            <label for="monto">Monto</label>
+                            <input type="text" class="form-control" name="monto" id="montoTXT" placeholder="ingrese monto">
+                        </div>
 
-                                <div class="col-sm-10">
-                                    <label for="fileinput">Foto</label>
-                                    <input required type="file" class="form-control" id="fotoFile" name="foto">
-                                    <br>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="importe">Importe</label>
-                            <input  class="form-control"  id="importe" name="importe" type="number" min="0" />
-                        </div>
 
                         <div id="preview">
-
                         </div>
                         <br>
                     </div>

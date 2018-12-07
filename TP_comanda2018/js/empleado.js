@@ -1,3 +1,4 @@
+"use strict";
 var restaurante;
 (function (restaurante) {
     var empleado = /** @class */ (function () {

@@ -258,7 +258,7 @@ class pedidoApi
             $pedModificar->idEmpleado = $datosToken->id;
             
             $pedModificar->FinalizarPedidoParametros($idPedido);
-            $ok = mesa::cambiarEstadoMesa($idMesa,"Con clientes comiendo");
+            //$ok = mesa::cambiarEstadoMesa($idMesa,"Con clientes comiendo");
         }
         else 
         {

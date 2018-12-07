@@ -1,3 +1,4 @@
+"use strict";
 var restaurante;
 (function (restaurante) {
     var tipoEmpleado;
@@ -24,4 +25,10 @@ var restaurante;
         tipoPerfil["admin"] = "admin";
         tipoPerfil["user"] = "user";
     })(tipoPerfil = restaurante.tipoPerfil || (restaurante.tipoPerfil = {}));
+    var tipoPedido;
+    (function (tipoPedido) {
+        tipoPedido["cocina"] = "cocina";
+        tipoPedido["bar"] = "bar";
+        tipoPedido["cerveza"] = "cerveza";
+    })(tipoPedido = restaurante.tipoPedido || (restaurante.tipoPedido = {}));
 })(restaurante || (restaurante = {}));

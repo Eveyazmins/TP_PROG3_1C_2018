@@ -97,7 +97,7 @@ class empleadoApi extends empleado
             //$response->withJson("Se dio de alta al empleado: ".$nombre);
 
         }else {
-            return $response->withJson("El empleado ya existe ",404);
+            return $response->withJson("El empleado ya existee ",404);
         }
 
         return $response;   
@@ -423,7 +423,7 @@ class empleadoApi extends empleado
         return (false !== filter_var($str, FILTER_VALIDATE_EMAIL));
     }
 
-    /*
+    
     public function modificarUno($request, $response, $args) 
     {
             $ArrayDeParametros = $request->getParsedBody();
@@ -526,7 +526,7 @@ class empleadoApi extends empleado
             $extension = pathinfo($fotoVieja, PATHINFO_EXTENSION);
             rename($fotoVieja , "fotosEmpleados/papelera/".trim($nombre)."-".$ahora.".".$extension);
     }
-*/
+
 
 
 

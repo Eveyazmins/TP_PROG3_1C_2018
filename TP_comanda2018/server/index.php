@@ -74,7 +74,7 @@ $app->group('/empleado', function () {
      //(POST id)
      $this->post('/borrar[/]', \empleadoApi::class . ':BorrarUno');
      //para buscar (POST id) a modificar cualquer dato del alta por post
-     //$this->post('/modificar[/]', \empleadoApi::class . ':modificarUno');
+     $this->post('/modificar[/]', \empleadoApi::class . ':modificarUno');
      //(POST id)
      $this->post('/suspender[/]', \empleadoApi::class . ':suspenderUno');
      //(POST id)

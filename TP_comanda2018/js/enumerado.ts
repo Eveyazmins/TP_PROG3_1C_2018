@@ -24,5 +24,13 @@ namespace restaurante
         user ="user"
     }
 
+    export enum tipoPedido{
+        cocina="cocina",
+        bar="bar",
+        cerveza="cerveza"
+    }
+
+
+
     
 }
